@@ -1,0 +1,2052 @@
+# Global Manual Bug Bounty Checklist
+
+> **Purpose:** A target-agnostic, manual-first checklist for authorized web, API, SaaS, identity, business-logic, integration, and client-side testing.
+
+> **Important:** No checklist can guarantee a valid or paid bug. A report must be in scope, reproducible, non-duplicate, and show real security impact. This checklist is designed to maximize coverage, discipline, and evidence quality.
+
+---
+
+## How to use this checklist
+
+- [ ] USE-001 — Read the live program policy before the first request of every session.
+- [ ] USE-002 — Test only explicitly authorized assets and vulnerability classes.
+- [ ] USE-003 — Use only accounts, organizations, projects, repositories, tenants, files, records, payments, and data you control.
+- [ ] USE-004 — Create unique canary values for every private object used in testing.
+- [ ] USE-005 — Capture an authorized baseline before altering any request.
+- [ ] USE-006 — Change one variable at a time: identity, role, object, tenant, method, field, state, timing, or transport.
+- [ ] USE-007 — Write the expected secure behavior before sending the modified request.
+- [ ] USE-008 — Save the sanitized request, response, role, object ownership, timestamp, and cleanup action.
+- [ ] USE-009 — Mark checks N/A only with a written reason.
+- [ ] USE-010 — Stop immediately if unrelated private data appears.
+- [ ] USE-011 — Do not perform denial-of-service, destructive actions, spam, credential stuffing, social engineering, or uncontrolled automation.
+- [ ] USE-012 — Use conservative request rates and small controlled datasets.
+- [ ] USE-013 — Prefer manual verification before writing any helper script.
+- [ ] USE-014 — Reproduce every candidate from a clean session.
+- [ ] USE-015 — Separate evidence collection from exploitation.
+
+## Scope, policy, and legal safety
+
+- [ ] SCOPE-001 — Save the current program overview.
+- [ ] SCOPE-002 — Save the current scope table.
+- [ ] SCOPE-003 — Save the current rewards table.
+- [ ] SCOPE-004 — Save all exclusions.
+- [ ] SCOPE-005 — Record the policy last-updated date.
+- [ ] SCOPE-006 — Record the scope last-updated date.
+- [ ] SCOPE-007 — Record each eligible hostname, wildcard, mobile app, API, repository, and product.
+- [ ] SCOPE-008 — Record each explicitly ineligible hostname, wildcard, app, API, and third-party provider.
+- [ ] SCOPE-009 — Record maximum severity per asset.
+- [ ] SCOPE-010 — Record prohibited testing methods.
+- [ ] SCOPE-011 — Record automation limits.
+- [ ] SCOPE-012 — Record rate limits.
+- [ ] SCOPE-013 — Record account creation rules.
+- [ ] SCOPE-014 — Record required researcher aliases or headers.
+- [ ] SCOPE-015 — Record whether multiple controlled accounts are permitted.
+- [ ] SCOPE-016 — Record whether production testing is restricted.
+- [ ] SCOPE-017 — Record whether source-code review is permitted.
+- [ ] SCOPE-018 — Record whether mobile testing is permitted.
+- [ ] SCOPE-019 — Record whether cloud infrastructure is permitted.
+- [ ] SCOPE-020 — Record whether third-party integrations are excluded.
+- [ ] SCOPE-021 — Record disclosure requirements.
+- [ ] SCOPE-022 — Record safe-harbor wording.
+- [ ] SCOPE-023 — Record data-retention and evidence-handling requirements.
+- [ ] SCOPE-024 — Record rules for accidental sensitive-data exposure.
+- [ ] SCOPE-025 — Record rules for public zero-days.
+- [ ] SCOPE-026 — Record rules for social engineering.
+- [ ] SCOPE-027 — Record rules for brute force and rate limits.
+- [ ] SCOPE-028 — Record rules for automated scanning.
+- [ ] SCOPE-029 — Record rules for denial-of-service and resource exhaustion.
+- [ ] SCOPE-030 — Record rules for testing real customer data.
+- [ ] SCOPE-031 — Create a written stop procedure for accidental private-data access.
+- [ ] SCOPE-032 — Create a written stop procedure for instability.
+- [ ] SCOPE-033 — Create a written stop procedure for third-party traffic.
+- [ ] SCOPE-034 — Confirm all active scanners are disabled unless explicitly permitted.
+- [ ] SCOPE-035 — Confirm recursive crawlers and high-rate fuzzers are disabled.
+- [ ] SCOPE-036 — Confirm no destructive payloads are queued.
+- [ ] SCOPE-037 — Confirm Burp target scope contains only authorized assets.
+- [ ] SCOPE-038 — Confirm known third parties are excluded from active testing.
+- [ ] SCOPE-039 — Confirm logs and evidence do not store unredacted secrets.
+- [ ] SCOPE-040 — Confirm your source IP, VPN, or test environment complies with policy.
+
+## Workspace and evidence preparation
+
+- [ ] WORK-001 — Create directories for scope, notes, recon, requests, responses, evidence, Burp, scripts, reports, and secrets.
+- [ ] WORK-002 — Create a hunting log.
+- [ ] WORK-003 — Create an endpoint inventory.
+- [ ] WORK-004 — Create an account and role matrix.
+- [ ] WORK-005 — Create a hypotheses file.
+- [ ] WORK-006 — Create a report draft.
+- [ ] WORK-007 — Create a target-specific .gitignore.
+- [ ] WORK-008 — Protect secrets with restrictive permissions.
+- [ ] WORK-009 — Use separate browser profiles for each controlled identity.
+- [ ] WORK-010 — Use separate password-manager records for each identity.
+- [ ] WORK-011 — Use unique canaries for every sensitive test object.
+- [ ] WORK-012 — Use descriptive evidence filenames.
+- [ ] WORK-013 — Record browser version.
+- [ ] WORK-014 — Record operating system and tool versions.
+- [ ] WORK-015 — Record testing IP.
+- [ ] WORK-016 — Record session start and end time.
+- [ ] WORK-017 — Record every temporary token created.
+- [ ] WORK-018 — Record every temporary webhook or integration created.
+- [ ] WORK-019 — Record every disposable account and resource.
+- [ ] WORK-020 — Plan cleanup before testing state-changing features.
+
+## Controlled identity and tenant lab
+
+- [ ] LAB-001 — Create Account A as the highest-privileged controlled user.
+- [ ] LAB-002 — Create Account B as a lower-privileged controlled user.
+- [ ] LAB-003 — Create Account C as a complete outsider when policy permits.
+- [ ] LAB-004 — Enable MFA on all controlled accounts.
+- [ ] LAB-005 — Create Tenant or Organization A.
+- [ ] LAB-006 — Create Tenant or Organization B.
+- [ ] LAB-007 — Create private and public resources under each tenant.
+- [ ] LAB-008 — Create resources owned individually and by organizations.
+- [ ] LAB-009 — Create role states: owner, admin, manager, editor, contributor, viewer, guest, suspended, invited, removed.
+- [ ] LAB-010 — Create direct membership and group-derived membership states.
+- [ ] LAB-011 — Create external collaborator and internal member states.
+- [ ] LAB-012 — Create active and expired invitation states.
+- [ ] LAB-013 — Create pending email verification states.
+- [ ] LAB-014 — Create pending MFA enrollment states.
+- [ ] LAB-015 — Create stale sessions before role downgrade.
+- [ ] LAB-016 — Create stale sessions before membership removal.
+- [ ] LAB-017 — Create stale sessions before account suspension.
+- [ ] LAB-018 — Create stale API tokens before revocation.
+- [ ] LAB-019 — Create stale pagination cursors before revocation.
+- [ ] LAB-020 — Create renamed resources.
+- [ ] LAB-021 — Create transferred resources.
+- [ ] LAB-022 — Create archived resources.
+- [ ] LAB-023 — Create deleted and recreated names.
+- [ ] LAB-024 — Create public-to-private transitions.
+- [ ] LAB-025 — Create private-to-public transitions.
+- [ ] LAB-026 — Create trial, free, paid, and disabled feature states when available.
+- [ ] LAB-027 — Create objects with unique synthetic confidential content.
+- [ ] LAB-028 — Create disposable files and exports.
+- [ ] LAB-029 — Create disposable webhooks and API keys.
+- [ ] LAB-030 — Create branch, project, issue, ticket, message, comment, invoice, payment, subscription, and report objects when applicable.
+
+## Reconnaissance and attack-surface mapping
+
+- [ ] RECON-001 — Enumerate only authorized domains and subdomains.
+- [ ] RECON-002 — Resolve DNS records for in-scope hosts.
+- [ ] RECON-003 — Identify live HTTP services conservatively.
+- [ ] RECON-004 — Record HTTP status, title, technology hints, redirects, and TLS names.
+- [ ] RECON-005 — Map application entry points.
+- [ ] RECON-006 — Map authentication entry points.
+- [ ] RECON-007 — Map API base paths and versions.
+- [ ] RECON-008 — Map GraphQL endpoints.
+- [ ] RECON-009 — Map WebSocket and server-sent-event endpoints.
+- [ ] RECON-010 — Map file-upload and file-download endpoints.
+- [ ] RECON-011 — Map import, export, preview, conversion, and rendering endpoints.
+- [ ] RECON-012 — Map webhooks, callbacks, integrations, and URL-fetching features.
+- [ ] RECON-013 — Map password reset, invite, verification, and account recovery flows.
+- [ ] RECON-014 — Map billing, subscription, checkout, credit, refund, coupon, and plan flows.
+- [ ] RECON-015 — Map admin, support, moderation, impersonation, and audit features.
+- [ ] RECON-016 — Map search, autocomplete, filtering, sorting, pagination, and bulk actions.
+- [ ] RECON-017 — Map background jobs, queues, scheduled tasks, and asynchronous workflows.
+- [ ] RECON-018 — Map mobile and desktop application backends if in scope.
+- [ ] RECON-019 — Map API documentation and schema files.
+- [ ] RECON-020 — Map robots.txt, sitemap files, well-known paths, and public manifests.
+- [ ] RECON-021 — Map first-party JavaScript bundles.
+- [ ] RECON-022 — Search first-party bundles for API paths.
+- [ ] RECON-023 — Search first-party bundles for hidden routes.
+- [ ] RECON-024 — Search first-party bundles for feature flags.
+- [ ] RECON-025 — Search first-party bundles for role checks.
+- [ ] RECON-026 — Search first-party bundles for object names and enums.
+- [ ] RECON-027 — Search first-party bundles for storage keys.
+- [ ] RECON-028 — Search first-party bundles for GraphQL operations.
+- [ ] RECON-029 — Search first-party bundles for WebSocket URLs.
+- [ ] RECON-030 — Search first-party bundles for upload, export, webhook, and URL-fetching code.
+- [ ] RECON-031 — Record every method, path parameter, query parameter, body field, header, cookie, enum, cursor, and identifier.
+- [ ] RECON-032 — Record all first-party redirect targets.
+- [ ] RECON-033 — Record all third-party dependencies but do not test them unless authorized.
+- [ ] RECON-034 — Compare documented and observed endpoints.
+- [ ] RECON-035 — Compare current and legacy API versions.
+- [ ] RECON-036 — Record caching and CORS behavior.
+- [ ] RECON-037 — Record every place private data appears in frontend responses.
+- [ ] RECON-038 — Record every UI-only validation rule.
+- [ ] RECON-039 — Record every server-side validation rule inferred from responses.
+- [ ] RECON-040 — Build endpoint-to-role, endpoint-to-object, endpoint-to-token, endpoint-to-state, and endpoint-to-impact matrices.
+
+## Authentication and login
+
+- [ ] AUTHN-001 — Test login with missing credentials.
+- [ ] AUTHN-002 — Test login with empty credentials.
+- [ ] AUTHN-003 — Test login with invalid credentials.
+- [ ] AUTHN-004 — Test username and email case handling.
+- [ ] AUTHN-005 — Test leading and trailing whitespace.
+- [ ] AUTHN-006 — Test Unicode normalization in identifiers.
+- [ ] AUTHN-007 — Test multiple identifiers mapped to one account.
+- [ ] AUTHN-008 — Test unverified email login.
+- [ ] AUTHN-009 — Test disabled account login.
+- [ ] AUTHN-010 — Test suspended account login.
+- [ ] AUTHN-011 — Test deleted account login.
+- [ ] AUTHN-012 — Test invited but unregistered account login.
+- [ ] AUTHN-013 — Test expired invitation login.
+- [ ] AUTHN-014 — Test login after password reset.
+- [ ] AUTHN-015 — Test login after password change.
+- [ ] AUTHN-016 — Test login after email change.
+- [ ] AUTHN-017 — Test login after MFA enable and disable.
+- [ ] AUTHN-018 — Test login after session revocation.
+- [ ] AUTHN-019 — Test login from multiple browser profiles.
+- [ ] AUTHN-020 — Test simultaneous controlled logins for identity mix-ups.
+- [ ] AUTHN-021 — Test login CSRF where the flow exists and impact can be demonstrated.
+- [ ] AUTHN-022 — Test session fixation using only controlled accounts.
+- [ ] AUTHN-023 — Verify session identifier rotation after login.
+- [ ] AUTHN-024 — Verify session identifier rotation after privilege change.
+- [ ] AUTHN-025 — Verify logout invalidates the server-side session.
+- [ ] AUTHN-026 — Verify logout clears all relevant cookies and client storage.
+- [ ] AUTHN-027 — Test replay after logout.
+- [ ] AUTHN-028 — Test browser back after logout.
+- [ ] AUTHN-029 — Test old tabs after logout.
+- [ ] AUTHN-030 — Test session behavior after account suspension.
+- [ ] AUTHN-031 — Test session behavior after account deletion.
+- [ ] AUTHN-032 — Test session behavior after role downgrade.
+- [ ] AUTHN-033 — Test session behavior after tenant removal.
+- [ ] AUTHN-034 — Test session behavior after password reset.
+- [ ] AUTHN-035 — Test session behavior after MFA reset.
+- [ ] AUTHN-036 — Check whether credentials or session tokens appear in URLs.
+- [ ] AUTHN-037 — Check whether credentials or session tokens appear in referrers.
+- [ ] AUTHN-038 — Check whether credentials or session tokens appear in frontend logs.
+- [ ] AUTHN-039 — Check whether cookie domain and path are narrower than necessary.
+- [ ] AUTHN-040 — Check whether session lifetime matches documented behavior.
+- [ ] AUTHN-041 — Check whether multiple active sessions can be viewed or revoked.
+- [ ] AUTHN-042 — Check whether remember-me state survives security-sensitive changes.
+- [ ] AUTHN-043 — Test duplicate Authorization headers.
+- [ ] AUTHN-044 — Test harmless whitespace and case variations in authentication schemes.
+- [ ] AUTHN-045 — Test authentication with missing, malformed, expired, revoked, and wrong-audience tokens.
+- [ ] AUTHN-046 — Test token confusion among user tokens, API keys, service tokens, refresh tokens, and session cookies.
+- [ ] AUTHN-047 — Test whether lower-scope tokens can call higher-scope endpoints.
+- [ ] AUTHN-048 — Test whether tokens remain usable after owner, tenant, or application deletion.
+- [ ] AUTHN-049 — Test whether client identifiers or secrets are accepted in the wrong location.
+- [ ] AUTHN-050 — Test whether authentication errors leak account existence beyond program rules.
+
+## Password reset, invitations, and recovery
+
+- [ ] RECOV-001 — Test reset request for existing and nonexistent controlled accounts.
+- [ ] RECOV-002 — Compare reset response status, body, size, timing, and headers.
+- [ ] RECOV-003 — Test reset token single use.
+- [ ] RECOV-004 — Test reset token expiration.
+- [ ] RECOV-005 — Test reset token after requesting a newer token.
+- [ ] RECOV-006 — Test reset token after password change.
+- [ ] RECOV-007 — Test reset token after email change.
+- [ ] RECOV-008 — Test reset token after account suspension.
+- [ ] RECOV-009 — Test reset token across controlled accounts.
+- [ ] RECOV-010 — Test reset token binding to the intended account.
+- [ ] RECOV-011 — Test reset token binding to the intended tenant when relevant.
+- [ ] RECOV-012 — Test host, scheme, and forwarded-header handling only on controlled callback links.
+- [ ] RECOV-013 — Test whether reset links leak through referrers.
+- [ ] RECOV-014 — Test whether reset links appear in analytics or logs.
+- [ ] RECOV-015 — Test whether reset changes invalidate old sessions.
+- [ ] RECOV-016 — Test whether reset changes invalidate old API tokens where expected.
+- [ ] RECOV-017 — Test invitation token single use.
+- [ ] RECOV-018 — Test invitation token expiration.
+- [ ] RECOV-019 — Test invitation after role change.
+- [ ] RECOV-020 — Test invitation after cancellation.
+- [ ] RECOV-021 — Test invitation after email change.
+- [ ] RECOV-022 — Test invitation acceptance by a different controlled account.
+- [ ] RECOV-023 — Test invitation role tampering.
+- [ ] RECOV-024 — Test invitation tenant tampering.
+- [ ] RECOV-025 — Test invitation object tampering.
+- [ ] RECOV-026 — Test invitation replay.
+- [ ] RECOV-027 — Test account-recovery fallback methods.
+- [ ] RECOV-028 — Test recovery-code single use.
+- [ ] RECOV-029 — Test recovery-code revocation after MFA reset.
+- [ ] RECOV-030 — Test email-change confirmation tokens.
+- [ ] RECOV-031 — Test email-change rollback and old-email notifications.
+- [ ] RECOV-032 — Test phone or device verification flows if present.
+- [ ] RECOV-033 — Test support-assisted recovery only through authorized self-service simulations.
+
+## Multi-factor authentication and step-up auth
+
+- [ ] MFA-001 — Test MFA enrollment without recent password confirmation.
+- [ ] MFA-002 — Test MFA disable without recent password confirmation.
+- [ ] MFA-003 — Test MFA reset without recent password confirmation.
+- [ ] MFA-004 — Test backup-code generation and revocation.
+- [ ] MFA-005 — Test backup-code single use.
+- [ ] MFA-006 — Test old backup codes after regeneration.
+- [ ] MFA-007 — Test TOTP replay within the same time window.
+- [ ] MFA-008 — Test TOTP across controlled accounts.
+- [ ] MFA-009 — Test clock-skew boundaries conservatively.
+- [ ] MFA-010 — Test remembered-device expiration.
+- [ ] MFA-011 — Test remembered-device revocation.
+- [ ] MFA-012 — Test device-cookie binding.
+- [ ] MFA-013 — Test MFA after password reset.
+- [ ] MFA-014 — Test MFA after email change.
+- [ ] MFA-015 — Test MFA after session revocation.
+- [ ] MFA-016 — Test step-up authentication for sensitive actions.
+- [ ] MFA-017 — Test stale step-up state.
+- [ ] MFA-018 — Test step-up state reuse across actions.
+- [ ] MFA-019 — Test step-up state reuse across controlled accounts.
+- [ ] MFA-020 — Test step-up state reuse across tenants.
+- [ ] MFA-021 — Test direct API calls that bypass UI step-up.
+- [ ] MFA-022 — Test alternate endpoints for the same sensitive action.
+- [ ] MFA-023 — Test recovery flow after MFA device removal.
+- [ ] MFA-024 — Test WebAuthn or passkey registration ownership.
+- [ ] MFA-025 — Test WebAuthn or passkey deletion authorization.
+- [ ] MFA-026 — Test passkey sign-in after account or tenant changes.
+
+## OAuth, OIDC, SAML, and SSO
+
+- [ ] SSO-001 — Record every supported identity provider and callback.
+- [ ] SSO-002 — Test missing state.
+- [ ] SSO-003 — Test empty state.
+- [ ] SSO-004 — Test reused state.
+- [ ] SSO-005 — Test state from another controlled browser session.
+- [ ] SSO-006 — Test expired state.
+- [ ] SSO-007 — Test cancelled authorization.
+- [ ] SSO-008 — Test missing authorization code.
+- [ ] SSO-009 — Test reused authorization code.
+- [ ] SSO-010 — Test code from another controlled session.
+- [ ] SSO-011 — Test account switching during authorization.
+- [ ] SSO-012 — Test simultaneous authorization flows.
+- [ ] SSO-013 — Test callback parameter reflection.
+- [ ] SSO-014 — Test alternate callback paths.
+- [ ] SSO-015 — Test redirect URI exact matching.
+- [ ] SSO-016 — Test open redirect chaining only where additional eligible impact exists.
+- [ ] SSO-017 — Test nonce enforcement in OIDC.
+- [ ] SSO-018 — Test issuer validation.
+- [ ] SSO-019 — Test audience validation.
+- [ ] SSO-020 — Test token type and algorithm validation without attempting unsafe infrastructure attacks.
+- [ ] SSO-021 — Test claims mapping for email, username, tenant, group, and role.
+- [ ] SSO-022 — Test unverified email claims.
+- [ ] SSO-023 — Test stale group and role claims.
+- [ ] SSO-024 — Test account linking between controlled identities.
+- [ ] SSO-025 — Test account unlinking.
+- [ ] SSO-026 — Test linking a provider already linked to another controlled account.
+- [ ] SSO-027 — Test SSO-required tenant behavior.
+- [ ] SSO-028 — Test login after SSO access removal.
+- [ ] SSO-029 — Test session after SSO group removal.
+- [ ] SSO-030 — Test JIT provisioning roles.
+- [ ] SSO-031 — Test SCIM deprovisioning effects.
+- [ ] SSO-032 — Test SAML RelayState handling.
+- [ ] SSO-033 — Test SAML response replay with controlled assertions.
+- [ ] SSO-034 — Test SAML destination and audience validation.
+- [ ] SSO-035 — Test tenant selection during SSO.
+- [ ] SSO-036 — Test domain-based tenant discovery.
+- [ ] SSO-037 — Test OAuth app consent and scope changes.
+- [ ] SSO-038 — Test revoked provider authorization.
+- [ ] SSO-039 — Test stale local sessions after provider revocation.
+
+## General authorization and tenant isolation
+
+- [ ] AUTHZ-001 — For every read request, replace only the object identifier with another controlled object's identifier.
+- [ ] AUTHZ-002 — For every write request, replace only the object identifier with another controlled object's identifier.
+- [ ] AUTHZ-003 — For every delete request, replace only the object identifier with another controlled disposable object's identifier.
+- [ ] AUTHZ-004 — Swap tenant or organization identifiers.
+- [ ] AUTHZ-005 — Swap project, workspace, repository, account, invoice, ticket, message, file, and report identifiers.
+- [ ] AUTHZ-006 — Swap parent and child identifiers independently.
+- [ ] AUTHZ-007 — Compare unauthorized and nonexistent responses.
+- [ ] AUTHZ-008 — Check object-existence leaks through status, body, size, headers, timing, pagination, and counts.
+- [ ] AUTHZ-009 — Check lists filter unauthorized objects.
+- [ ] AUTHZ-010 — Check search filters unauthorized objects.
+- [ ] AUTHZ-011 — Check autocomplete filters unauthorized objects.
+- [ ] AUTHZ-012 — Check recent history filters unauthorized objects.
+- [ ] AUTHZ-013 — Check activity feeds filter unauthorized objects.
+- [ ] AUTHZ-014 — Check exports filter unauthorized objects.
+- [ ] AUTHZ-015 — Check aggregates and dashboards filter unauthorized objects.
+- [ ] AUTHZ-016 — Check bulk endpoints authorize every object independently.
+- [ ] AUTHZ-017 — Check partial failures do not leak unauthorized metadata.
+- [ ] AUTHZ-018 — Check parent and child objects are both authorized.
+- [ ] AUTHZ-019 — Check authorized parent plus unauthorized child.
+- [ ] AUTHZ-020 — Check unauthorized parent plus authorized child.
+- [ ] AUTHZ-021 — Check cross-tenant parent/child mixing.
+- [ ] AUTHZ-022 — Check direct URL access to hidden UI routes.
+- [ ] AUTHZ-023 — Check client-side role restrictions have server-side enforcement.
+- [ ] AUTHZ-024 — Check alternate HTTP methods.
+- [ ] AUTHZ-025 — Check method-override headers and parameters.
+- [ ] AUTHZ-026 — Check alternate content types.
+- [ ] AUTHZ-027 — Check API and dashboard enforcement consistency.
+- [ ] AUTHZ-028 — Check current and legacy endpoint enforcement consistency.
+- [ ] AUTHZ-029 — Check preview, simulator, validation, retry, confirmation, export, and background-job endpoints.
+- [ ] AUTHZ-030 — Check renamed resources.
+- [ ] AUTHZ-031 — Check transferred resources.
+- [ ] AUTHZ-032 — Check archived resources.
+- [ ] AUTHZ-033 — Check deleted and recreated names.
+- [ ] AUTHZ-034 — Check public-to-private transitions.
+- [ ] AUTHZ-035 — Check private-to-public transitions.
+- [ ] AUTHZ-036 — Check stale sessions after role downgrade.
+- [ ] AUTHZ-037 — Check stale sessions after membership removal.
+- [ ] AUTHZ-038 — Check stale tokens after revocation.
+- [ ] AUTHZ-039 — Check stale cursors after revocation.
+- [ ] AUTHZ-040 — Check delegated roles never exceed base roles.
+- [ ] AUTHZ-041 — Check group-derived permissions after group removal.
+- [ ] AUTHZ-042 — Check invitation-derived permissions after cancellation.
+- [ ] AUTHZ-043 — Check service accounts and API keys remain tenant-scoped.
+- [ ] AUTHZ-044 — Check public-resource access never grants private-resource access.
+- [ ] AUTHZ-045 — Check tenant membership alone does not grant every tenant resource.
+- [ ] AUTHZ-046 — Check object ownership and tenant membership are not confused.
+- [ ] AUTHZ-047 — Check support, moderation, impersonation, and admin features require explicit authorization.
+- [ ] AUTHZ-048 — Check audit logs identify the real actor.
+- [ ] AUTHZ-049 — Check role-management endpoints cannot assign a higher role than the caller owns.
+- [ ] AUTHZ-050 — Check self-role modification is prevented.
+
+## API parsing, validation, and mass assignment
+
+- [ ] API-001 — Send the documented content type.
+- [ ] API-002 — Omit Content-Type.
+- [ ] API-003 — Use text/plain.
+- [ ] API-004 — Use form encoding when accepted by the UI.
+- [ ] API-005 — Send malformed JSON.
+- [ ] API-006 — Send duplicate JSON keys.
+- [ ] API-007 — Send conflicting duplicate authorization-sensitive keys.
+- [ ] API-008 — Check whether first or last duplicate wins.
+- [ ] API-009 — Send arrays where scalars are expected.
+- [ ] API-010 — Send scalars where arrays are expected.
+- [ ] API-011 — Send nested objects where IDs are expected.
+- [ ] API-012 — Send null for optional fields.
+- [ ] API-013 — Send null for required fields.
+- [ ] API-014 — Omit one required field at a time.
+- [ ] API-015 — Add undocumented fields.
+- [ ] API-016 — Add server-managed IDs.
+- [ ] API-017 — Add server-managed owner fields.
+- [ ] API-018 — Add server-managed tenant fields.
+- [ ] API-019 — Add server-managed role fields.
+- [ ] API-020 — Add server-managed status fields.
+- [ ] API-021 — Add server-managed scope fields.
+- [ ] API-022 — Attempt to update immutable identifiers.
+- [ ] API-023 — Attempt to update immutable ownership.
+- [ ] API-024 — Attempt to update immutable tenant association.
+- [ ] API-025 — Test enum case handling.
+- [ ] API-026 — Test enum whitespace.
+- [ ] API-027 — Test unknown enum values.
+- [ ] API-028 — Test duplicate enum values.
+- [ ] API-029 — Test empty strings.
+- [ ] API-030 — Test whitespace-only strings.
+- [ ] API-031 — Test documented maximum lengths.
+- [ ] API-032 — Test one character above maximum.
+- [ ] API-033 — Test Unicode normalization.
+- [ ] API-034 — Test harmless control characters.
+- [ ] API-035 — Test newlines in text fields.
+- [ ] API-036 — Test duplicate array values.
+- [ ] API-037 — Test empty arrays.
+- [ ] API-038 — Test negative integers.
+- [ ] API-039 — Test zero where positive values are expected.
+- [ ] API-040 — Test large but non-disruptive integers.
+- [ ] API-041 — Test floating-point values where integers are expected.
+- [ ] API-042 — Test scientific notation.
+- [ ] API-043 — Test booleans as strings.
+- [ ] API-044 — Test numbers as strings.
+- [ ] API-045 — Test unknown query parameters.
+- [ ] API-046 — Test duplicate query parameters.
+- [ ] API-047 — Test conflicting path and body identifiers.
+- [ ] API-048 — Test conflicting query and body identifiers.
+- [ ] API-049 — Test trailing slashes.
+- [ ] API-050 — Test repeated slashes.
+- [ ] API-051 — Test path case variations.
+- [ ] API-052 — Test safe dot-segment normalization.
+- [ ] API-053 — Test pagination minimum.
+- [ ] API-054 — Test pagination maximum.
+- [ ] API-055 — Test one above pagination maximum.
+- [ ] API-056 — Test invalid cursors.
+- [ ] API-057 — Test cross-account cursors.
+- [ ] API-058 — Test cross-tenant cursors.
+- [ ] API-059 — Test stale cursors.
+- [ ] API-060 — Test sort authorization.
+- [ ] API-061 — Test filter authorization.
+- [ ] API-062 — Test date range boundaries.
+- [ ] API-063 — Test timezone boundaries.
+- [ ] API-064 — Test duplicate create requests.
+- [ ] API-065 — Test request replay.
+- [ ] API-066 — Test idempotency behavior.
+- [ ] API-067 — Check errors never echo tokens, cookies, secrets, or unauthorized private data.
+
+## GraphQL
+
+- [ ] GQL-001 — Identify GraphQL endpoints.
+- [ ] GQL-002 — Record operation names.
+- [ ] GQL-003 — Record variables and custom scalars.
+- [ ] GQL-004 — Test unauthenticated introspection only if permitted.
+- [ ] GQL-005 — Do not report introspection alone.
+- [ ] GQL-006 — Test hidden fields for authorization.
+- [ ] GQL-007 — Test nested resolver authorization.
+- [ ] GQL-008 — Test node or global-ID authorization.
+- [ ] GQL-009 — Test aliases for duplicate sensitive operations.
+- [ ] GQL-010 — Test batched operations.
+- [ ] GQL-011 — Test fragments that request hidden fields.
+- [ ] GQL-012 — Test field-level authorization.
+- [ ] GQL-013 — Test mutation-level authorization.
+- [ ] GQL-014 — Test parent-child authorization.
+- [ ] GQL-015 — Test pagination cursors across accounts and tenants.
+- [ ] GQL-016 — Test search and aggregate resolvers.
+- [ ] GQL-017 — Test GraphQL error leakage.
+- [ ] GQL-018 — Test over-posting through input objects.
+- [ ] GQL-019 — Test server-managed fields in mutations.
+- [ ] GQL-020 — Test nullability edge cases.
+- [ ] GQL-021 — Test enum edge cases.
+- [ ] GQL-022 — Test duplicate input keys through raw JSON.
+- [ ] GQL-023 — Test GET versus POST behavior.
+- [ ] GQL-024 — Test persisted-query authorization.
+- [ ] GQL-025 — Test subscription authorization if present.
+- [ ] GQL-026 — Test stale subscriptions after role removal.
+- [ ] GQL-027 — Test object existence through errors and timing.
+- [ ] GQL-028 — Test query depth only conservatively and do not stress the service.
+- [ ] GQL-029 — Test cost or complexity controls only at low volume.
+
+## Input handling and injection
+
+- [ ] INPUT-001 — Map every reflected field.
+- [ ] INPUT-002 — Map every stored field.
+- [ ] INPUT-003 — Test harmless HTML metacharacters.
+- [ ] INPUT-004 — Test harmless attribute-breaking characters.
+- [ ] INPUT-005 — Test harmless JavaScript-context characters when reflected in script contexts.
+- [ ] INPUT-006 — Test organization names.
+- [ ] INPUT-007 — Test project names.
+- [ ] INPUT-008 — Test usernames and display names.
+- [ ] INPUT-009 — Test file names.
+- [ ] INPUT-010 — Test titles, descriptions, comments, messages, labels, tags, and notes.
+- [ ] INPUT-011 — Test rendering in tables.
+- [ ] INPUT-012 — Test rendering in tooltips.
+- [ ] INPUT-013 — Test rendering in dialogs.
+- [ ] INPUT-014 — Test rendering in toast messages.
+- [ ] INPUT-015 — Test rendering in emails you control.
+- [ ] INPUT-016 — Test rendering in exports.
+- [ ] INPUT-017 — Test rendering in PDFs generated from controlled data.
+- [ ] INPUT-018 — Test rendering in audit logs.
+- [ ] INPUT-019 — Test rendering in notifications.
+- [ ] INPUT-020 — Test rendering in copied values.
+- [ ] INPUT-021 — Test Markdown sanitization.
+- [ ] INPUT-022 — Test link scheme validation.
+- [ ] INPUT-023 — Test template delimiters where reflection occurs.
+- [ ] INPUT-024 — Test CSV formula prefixes only where real impact can be demonstrated.
+- [ ] INPUT-025 — Test JSON escaping.
+- [ ] INPUT-026 — Test newline handling in logs.
+- [ ] INPUT-027 — Test Unicode bidirectional characters for security-relevant deception.
+- [ ] INPUT-028 — Test URL construction from user-controlled names.
+- [ ] INPUT-029 — Test whether user input reaches response headers.
+- [ ] INPUT-030 — Test CR/LF only in harmless controlled fields.
+- [ ] INPUT-031 — Test SQL metacharacters at low volume only where database behavior is evidenced.
+- [ ] INPUT-032 — Test NoSQL-style operators only in structured filters.
+- [ ] INPUT-033 — Test LDAP or search-filter metacharacters only where such integrations exist.
+- [ ] INPUT-034 — Test command separators only where server-side command execution is strongly indicated.
+- [ ] INPUT-035 — Do not attempt destructive command execution or bulk extraction.
+- [ ] INPUT-036 — Test path traversal in controlled file operations.
+- [ ] INPUT-037 — Test template rendering in document, email, and preview features.
+- [ ] INPUT-038 — Test XML parsing only where XML is accepted.
+- [ ] INPUT-039 — Test entity expansion only with non-destructive, local, controlled proofs and policy approval.
+- [ ] INPUT-040 — Test deserialization only where a documented or observed serialized format exists.
+
+## File upload, download, import, export, and conversion
+
+- [ ] FILE-001 — Record allowed file types.
+- [ ] FILE-002 — Record server-side MIME validation.
+- [ ] FILE-003 — Record extension validation.
+- [ ] FILE-004 — Record magic-byte validation.
+- [ ] FILE-005 — Test mismatched extension and MIME type.
+- [ ] FILE-006 — Test uppercase and mixed-case extensions.
+- [ ] FILE-007 — Test double extensions.
+- [ ] FILE-008 — Test trailing-dot and whitespace filenames.
+- [ ] FILE-009 — Test Unicode filenames.
+- [ ] FILE-010 — Test duplicate filenames.
+- [ ] FILE-011 — Test empty files.
+- [ ] FILE-012 — Test documented maximum size.
+- [ ] FILE-013 — Test one byte above maximum.
+- [ ] FILE-014 — Test metadata stripping.
+- [ ] FILE-015 — Test image re-encoding.
+- [ ] FILE-016 — Test archive handling with small controlled archives.
+- [ ] FILE-017 — Test nested archives only if explicitly permitted and without resource exhaustion.
+- [ ] FILE-018 — Test path components in filenames.
+- [ ] FILE-019 — Test absolute paths in filenames.
+- [ ] FILE-020 — Test dot-dot sequences in filenames.
+- [ ] FILE-021 — Test download authorization.
+- [ ] FILE-022 — Test preview authorization.
+- [ ] FILE-023 — Test thumbnail authorization.
+- [ ] FILE-024 — Test transformed-file authorization.
+- [ ] FILE-025 — Test signed URL expiration.
+- [ ] FILE-026 — Test signed URL reuse.
+- [ ] FILE-027 — Test signed URL cross-account use.
+- [ ] FILE-028 — Test signed URL cross-tenant use.
+- [ ] FILE-029 — Test deleted-file access.
+- [ ] FILE-030 — Test replaced-file stale URL access.
+- [ ] FILE-031 — Test private-to-public and public-to-private transitions.
+- [ ] FILE-032 — Test filename rendering.
+- [ ] FILE-033 — Test Content-Disposition safety.
+- [ ] FILE-034 — Test Content-Type safety.
+- [ ] FILE-035 — Test SVG handling if accepted.
+- [ ] FILE-036 — Test HTML file handling if accepted.
+- [ ] FILE-037 — Test office-document preview if present.
+- [ ] FILE-038 — Test PDF generation from controlled content.
+- [ ] FILE-039 — Test spreadsheet exports.
+- [ ] FILE-040 — Test CSV imports.
+- [ ] FILE-041 — Test import ownership and tenant association.
+- [ ] FILE-042 — Test import server-managed fields.
+- [ ] FILE-043 — Test import rollback on partial failure.
+- [ ] FILE-044 — Test export field overexposure.
+- [ ] FILE-045 — Test export authorization for filters, date ranges, and selected objects.
+- [ ] FILE-046 — Test async export job authorization.
+- [ ] FILE-047 — Test export download after role removal.
+- [ ] FILE-048 — Test conversion callback and status endpoints.
+- [ ] FILE-049 — Test antivirus status and error handling without uploading malware.
+
+## Business logic and state machines
+
+- [ ] LOGIC-001 — Document the expected state machine for every feature.
+- [ ] LOGIC-002 — Attempt each transition as every controlled role.
+- [ ] LOGIC-003 — Attempt transitions out of order.
+- [ ] LOGIC-004 — Repeat completed transitions.
+- [ ] LOGIC-005 — Replay final actions without preview.
+- [ ] LOGIC-006 — Replay final actions without confirmation.
+- [ ] LOGIC-007 — Change the object between preview and confirmation.
+- [ ] LOGIC-008 — Change the tenant between preview and confirmation.
+- [ ] LOGIC-009 — Change the action between preview and confirmation.
+- [ ] LOGIC-010 — Reuse confirmation artifacts across objects.
+- [ ] LOGIC-011 — Reuse confirmation artifacts across accounts.
+- [ ] LOGIC-012 — Reuse confirmation artifacts across tenants.
+- [ ] LOGIC-013 — Test stale frontend state after role downgrade.
+- [ ] LOGIC-014 — Test stale frontend state after removal.
+- [ ] LOGIC-015 — Test stale frontend state after suspension.
+- [ ] LOGIC-016 — Test stale frontend state after feature disable.
+- [ ] LOGIC-017 — Test duplicate names.
+- [ ] LOGIC-018 — Test case-colliding names.
+- [ ] LOGIC-019 — Test Unicode-normalized name collisions.
+- [ ] LOGIC-020 — Test deleted-name reuse.
+- [ ] LOGIC-021 — Test renamed-object aliases.
+- [ ] LOGIC-022 — Test transfer between controlled tenants.
+- [ ] LOGIC-023 — Test archive and restore.
+- [ ] LOGIC-024 — Test soft delete and hard delete behavior.
+- [ ] LOGIC-025 — Test pending actions during role removal.
+- [ ] LOGIC-026 — Test pending actions during tenant transfer.
+- [ ] LOGIC-027 — Test pending actions during visibility changes.
+- [ ] LOGIC-028 — Test pending actions during integration removal.
+- [ ] LOGIC-029 — Test feature gates server-side.
+- [ ] LOGIC-030 — Test plan gates server-side.
+- [ ] LOGIC-031 — Test trial expiration.
+- [ ] LOGIC-032 — Test downgrade behavior.
+- [ ] LOGIC-033 — Test disabled-feature direct API access.
+- [ ] LOGIC-034 — Test stale background jobs after feature disable.
+- [ ] LOGIC-035 — Test stale scheduled jobs after account removal.
+- [ ] LOGIC-036 — Test bulk actions with mixed authorized and unauthorized controlled objects.
+- [ ] LOGIC-037 — Test partial failure rollback.
+- [ ] LOGIC-038 — Test duplicate submission.
+- [ ] LOGIC-039 — Test replay after deletion.
+- [ ] LOGIC-040 — Test replay after ownership change.
+- [ ] LOGIC-041 — Test actor attribution.
+
+## Payments, subscriptions, credits, and commerce
+
+- [ ] PAY-001 — Use only sandbox or controlled low-risk payment flows permitted by policy.
+- [ ] PAY-002 — Record plan and pricing identifiers.
+- [ ] PAY-003 — Test client-side price tampering.
+- [ ] PAY-004 — Test quantity tampering.
+- [ ] PAY-005 — Test currency tampering.
+- [ ] PAY-006 — Test coupon ownership and reuse.
+- [ ] PAY-007 — Test expired coupon use.
+- [ ] PAY-008 — Test tenant-bound coupon use.
+- [ ] PAY-009 — Test referral ownership.
+- [ ] PAY-010 — Test trial creation limits.
+- [ ] PAY-011 — Test trial reuse after account or tenant recreation.
+- [ ] PAY-012 — Test plan upgrade without successful payment.
+- [ ] PAY-013 — Test plan downgrade behavior.
+- [ ] PAY-014 — Test cancellation timing.
+- [ ] PAY-015 — Test renewal timing.
+- [ ] PAY-016 — Test refund authorization.
+- [ ] PAY-017 — Test credit-balance authorization.
+- [ ] PAY-018 — Test invoice download authorization.
+- [ ] PAY-019 — Test invoice object ID swapping.
+- [ ] PAY-020 — Test checkout-session reuse.
+- [ ] PAY-021 — Test checkout-session cross-account use.
+- [ ] PAY-022 — Test payment callback replay only in documented sandbox or controlled flows.
+- [ ] PAY-023 — Test payment-state race conservatively.
+- [ ] PAY-024 — Test duplicate order creation.
+- [ ] PAY-025 — Test duplicate refund requests.
+- [ ] PAY-026 — Test negative and zero quantities.
+- [ ] PAY-027 — Test tax and shipping field validation where applicable.
+- [ ] PAY-028 — Test gift-card or credit-code ownership.
+- [ ] PAY-029 — Test digital-goods entitlement after refund or cancellation.
+- [ ] PAY-030 — Test premium feature access after payment failure.
+- [ ] PAY-031 — Test webhook and backend state consistency.
+- [ ] PAY-032 — Do not attempt real financial loss, chargeback abuse, or unauthorized purchases.
+
+## Webhooks, callbacks, integrations, and URL fetching
+
+- [ ] HOOK-001 — Identify every URL-accepting feature.
+- [ ] HOOK-002 — Use only callback endpoints and domains you control.
+- [ ] HOOK-003 — Create a unique canary for each callback.
+- [ ] HOOK-004 — Record method, headers, body, source behavior, and redirects.
+- [ ] HOOK-005 — Test HTTP-to-HTTPS redirects on controlled hosts.
+- [ ] HOOK-006 — Test same-host redirects.
+- [ ] HOOK-007 — Test cross-host redirects between controlled hosts.
+- [ ] HOOK-008 — Test destination revalidation after redirects.
+- [ ] HOOK-009 — Test userinfo syntax using controlled hosts.
+- [ ] HOOK-010 — Test harmless alternate URL encodings.
+- [ ] HOOK-011 — Test fragment and query handling.
+- [ ] HOOK-012 — Test non-HTTP scheme rejection.
+- [ ] HOOK-013 — Check whether internal headers or credentials are forwarded.
+- [ ] HOOK-014 — Check whether response content is reflected.
+- [ ] HOOK-015 — Check whether callback errors leak secrets.
+- [ ] HOOK-016 — Test webhook secret creation and rotation.
+- [ ] HOOK-017 — Test webhook ownership.
+- [ ] HOOK-018 — Test webhook tenant isolation.
+- [ ] HOOK-019 — Test webhook delivery logs.
+- [ ] HOOK-020 — Test webhook replay handling.
+- [ ] HOOK-021 — Test webhook signature verification with controlled events.
+- [ ] HOOK-022 — Test timestamp tolerance.
+- [ ] HOOK-023 — Test duplicate event IDs.
+- [ ] HOOK-024 — Test out-of-order events.
+- [ ] HOOK-025 — Test disabled webhook delivery.
+- [ ] HOOK-026 — Test deleted integration access.
+- [ ] HOOK-027 — Test integration token revocation.
+- [ ] HOOK-028 — Test integration role changes.
+- [ ] HOOK-029 — Test import or sync object ownership.
+- [ ] HOOK-030 — Test integration-installed resource selection.
+- [ ] HOOK-031 — Do not probe cloud metadata, loopback, link-local, RFC1918, internal DNS, third parties, or ports.
+
+## CORS, caching, headers, and response handling
+
+- [ ] RESP-001 — Record CORS behavior for unauthenticated responses.
+- [ ] RESP-002 — Record CORS behavior for authenticated responses.
+- [ ] RESP-003 — Test a controlled untrusted Origin.
+- [ ] RESP-004 — Test credentialed CORS behavior.
+- [ ] RESP-005 — Check wildcard-origin combinations.
+- [ ] RESP-006 — Check reflected-origin validation.
+- [ ] RESP-007 — Check Vary: Origin.
+- [ ] RESP-008 — Check preflight authorization.
+- [ ] RESP-009 — Check allowed methods.
+- [ ] RESP-010 — Check allowed headers.
+- [ ] RESP-011 — Check exposed headers.
+- [ ] RESP-012 — Check whether authenticated responses are privately cached.
+- [ ] RESP-013 — Check whether cache keys include authorization.
+- [ ] RESP-014 — Check whether cache keys include tenant.
+- [ ] RESP-015 — Check whether cache keys include object identifiers.
+- [ ] RESP-016 — Check whether cache keys include security-relevant query parameters.
+- [ ] RESP-017 — Check logout cache behavior.
+- [ ] RESP-018 — Check role-change cache invalidation.
+- [ ] RESP-019 — Check visibility-change cache invalidation.
+- [ ] RESP-020 — Check ETag behavior.
+- [ ] RESP-021 — Check Last-Modified behavior.
+- [ ] RESP-022 — Check HEAD metadata leakage.
+- [ ] RESP-023 — Check redirect leakage.
+- [ ] RESP-024 — Check error-page private-data leakage.
+- [ ] RESP-025 — Check analytics payloads.
+- [ ] RESP-026 — Check monitoring payloads.
+- [ ] RESP-027 — Check support/chat payloads.
+- [ ] RESP-028 — Check referrer leakage.
+- [ ] RESP-029 — Check downloadable metadata.
+- [ ] RESP-030 — Check whether secrets reappear after initial creation.
+- [ ] RESP-031 — Check audit-log redaction.
+- [ ] RESP-032 — Check actor attribution.
+- [ ] RESP-033 — Do not report missing best-practice headers alone unless eligible impact exists.
+
+## Client-side, DOM, storage, and browser behavior
+
+- [ ] CLIENT-001 — Review first-party routes rendering controlled data.
+- [ ] CLIENT-002 — Test reflected XSS with harmless non-networking proof payloads.
+- [ ] CLIENT-003 — Test stored XSS only in controlled objects.
+- [ ] CLIENT-004 — Test DOM-based sources and sinks.
+- [ ] CLIENT-005 — Test URL fragment handling.
+- [ ] CLIENT-006 — Test query-string handling.
+- [ ] CLIENT-007 — Test path-segment rendering.
+- [ ] CLIENT-008 — Test postMessage origin validation.
+- [ ] CLIENT-009 — Test sensitive data sent via postMessage.
+- [ ] CLIENT-010 — Test localStorage for tokens and secrets.
+- [ ] CLIENT-011 — Test sessionStorage for tokens and secrets.
+- [ ] CLIENT-012 — Test IndexedDB for cross-account data.
+- [ ] CLIENT-013 — Test service-worker caches.
+- [ ] CLIENT-014 — Test logout storage cleanup.
+- [ ] CLIENT-015 — Test account-switch storage cleanup.
+- [ ] CLIENT-016 — Test tenant-switch storage cleanup.
+- [ ] CLIENT-017 — Test role-downgrade cache cleanup.
+- [ ] CLIENT-018 — Test browser back after logout.
+- [ ] CLIENT-019 — Test hidden buttons and disabled controls.
+- [ ] CLIENT-020 — Test direct navigation to restricted routes.
+- [ ] CLIENT-021 — Test client-side plan gates.
+- [ ] CLIENT-022 — Test client-side role gates.
+- [ ] CLIENT-023 — Test clipboard behavior.
+- [ ] CLIENT-024 — Test downloads and generated filenames.
+- [ ] CLIENT-025 — Test exports for hidden fields.
+- [ ] CLIENT-026 — Test error monitoring for secrets.
+- [ ] CLIENT-027 — Use source maps only to build server-side hypotheses.
+- [ ] CLIENT-028 — Do not report source maps alone without impact.
+- [ ] CLIENT-029 — Test tabnabbing only when additional eligible impact exists.
+- [ ] CLIENT-030 — Test clickjacking only on sensitive actions and where eligible.
+
+## WebSockets, SSE, and real-time channels
+
+- [ ] REALTIME-001 — Identify WebSocket and SSE endpoints.
+- [ ] REALTIME-002 — Record authentication method.
+- [ ] REALTIME-003 — Test unauthenticated connection.
+- [ ] REALTIME-004 — Test expired token connection.
+- [ ] REALTIME-005 — Test revoked token connection.
+- [ ] REALTIME-006 — Test connection after logout.
+- [ ] REALTIME-007 — Test connection after role downgrade.
+- [ ] REALTIME-008 — Test connection after tenant removal.
+- [ ] REALTIME-009 — Test channel or topic identifier swapping.
+- [ ] REALTIME-010 — Test cross-tenant subscriptions.
+- [ ] REALTIME-011 — Test private event filtering.
+- [ ] REALTIME-012 — Test event history or replay.
+- [ ] REALTIME-013 — Test message authorization.
+- [ ] REALTIME-014 — Test server-side action authorization.
+- [ ] REALTIME-015 — Test client-supplied user or tenant fields.
+- [ ] REALTIME-016 — Test duplicate subscription handling.
+- [ ] REALTIME-017 — Test reconnect behavior.
+- [ ] REALTIME-018 — Test stale connection cleanup.
+- [ ] REALTIME-019 — Test presence and typing indicators for privacy leaks.
+- [ ] REALTIME-020 — Test notification counts and metadata.
+- [ ] REALTIME-021 — Test GraphQL subscriptions if used.
+- [ ] REALTIME-022 — Use low message volume and avoid flooding.
+
+## Search, autocomplete, logs, analytics, and exports
+
+- [ ] DATA-001 — Test search with no access.
+- [ ] DATA-002 — Test search after access removal.
+- [ ] DATA-003 — Test search filters across tenants.
+- [ ] DATA-004 — Test autocomplete across tenants.
+- [ ] DATA-005 — Test recent items after access removal.
+- [ ] DATA-006 — Test activity feed after access removal.
+- [ ] DATA-007 — Test notification metadata.
+- [ ] DATA-008 — Test counts and aggregates.
+- [ ] DATA-009 — Test chart data.
+- [ ] DATA-010 — Test dashboard widgets.
+- [ ] DATA-011 — Test date range filters.
+- [ ] DATA-012 — Test timezone boundaries.
+- [ ] DATA-013 — Test pagination cursors.
+- [ ] DATA-014 — Test sort order.
+- [ ] DATA-015 — Test hidden fields in API responses.
+- [ ] DATA-016 — Test log entry ownership.
+- [ ] DATA-017 — Test log actor identity.
+- [ ] DATA-018 — Test log secret redaction.
+- [ ] DATA-019 — Test log newline handling.
+- [ ] DATA-020 — Test export scope.
+- [ ] DATA-021 — Test export filters.
+- [ ] DATA-022 — Test async export jobs.
+- [ ] DATA-023 — Test export downloads after access removal.
+- [ ] DATA-024 — Test export retention.
+- [ ] DATA-025 — Test deleted-object remnants.
+- [ ] DATA-026 — Test archived-object remnants.
+- [ ] DATA-027 — Test private-to-public transition remnants.
+- [ ] DATA-028 — Test public-to-private transition remnants.
+- [ ] DATA-029 — Test analytics endpoint authorization.
+- [ ] DATA-030 — Test aggregate privacy leaks.
+
+## Race conditions, replay, and concurrency
+
+- [ ] RACE-001 — Use only a small number of concurrent requests on disposable controlled objects.
+- [ ] RACE-002 — Test simultaneous conflicting updates.
+- [ ] RACE-003 — Test simultaneous create requests.
+- [ ] RACE-004 — Test simultaneous delete requests.
+- [ ] RACE-005 — Test update versus delete.
+- [ ] RACE-006 — Test action versus role downgrade.
+- [ ] RACE-007 — Test action versus membership removal.
+- [ ] RACE-008 — Test action versus account suspension.
+- [ ] RACE-009 — Test action versus token revocation.
+- [ ] RACE-010 — Test action versus tenant transfer.
+- [ ] RACE-011 — Test action versus object rename.
+- [ ] RACE-012 — Test action versus visibility change.
+- [ ] RACE-013 — Test action versus integration removal.
+- [ ] RACE-014 — Test duplicate payment or credit operations only in permitted sandbox flows.
+- [ ] RACE-015 — Test duplicate invitation acceptance.
+- [ ] RACE-016 — Test duplicate reset-token use.
+- [ ] RACE-017 — Test duplicate coupon use.
+- [ ] RACE-018 — Test duplicate webhook events.
+- [ ] RACE-019 — Test stale-version overwrite.
+- [ ] RACE-020 — Test optimistic-lock fields.
+- [ ] RACE-021 — Test replay after success.
+- [ ] RACE-022 — Test replay after deletion.
+- [ ] RACE-023 — Test replay after ownership change.
+- [ ] RACE-024 — Test replay under another controlled account.
+- [ ] RACE-025 — Stop immediately if concurrency causes instability.
+
+## Mobile and desktop client backends
+
+- [ ] MOBILE-001 — Confirm the mobile or desktop app is in scope.
+- [ ] MOBILE-002 — Map first-party API hosts used by the app.
+- [ ] MOBILE-003 — Map deep links and universal links.
+- [ ] MOBILE-004 — Map custom URL schemes.
+- [ ] MOBILE-005 — Map local token storage.
+- [ ] MOBILE-006 — Map certificate and trust behavior without bypassing third-party protections outside scope.
+- [ ] MOBILE-007 — Compare mobile and web authorization.
+- [ ] MOBILE-008 — Compare mobile and web validation.
+- [ ] MOBILE-009 — Test stale mobile sessions after logout and role removal.
+- [ ] MOBILE-010 — Test push-notification metadata.
+- [ ] MOBILE-011 — Test deep-link object authorization.
+- [ ] MOBILE-012 — Test exported intents or URL handlers where applicable.
+- [ ] MOBILE-013 — Test local cached private data after logout.
+- [ ] MOBILE-014 — Test screenshots and app-switcher privacy if eligible.
+- [ ] MOBILE-015 — Test backup inclusion for sensitive local files.
+- [ ] MOBILE-016 — Test API version differences used by older app versions still supported.
+- [ ] MOBILE-017 — Test device-binding behavior.
+- [ ] MOBILE-018 — Test device removal.
+- [ ] MOBILE-019 — Test remote logout.
+- [ ] MOBILE-020 — Do not reverse engineer or tamper beyond program authorization.
+
+## Cloud, storage, CI/CD, and infrastructure-adjacent surfaces
+
+- [ ] CLOUD-001 — Confirm cloud and infrastructure assets are explicitly in scope.
+- [ ] CLOUD-002 — Map first-party object-storage URLs exposed by the application.
+- [ ] CLOUD-003 — Test signed URL expiration.
+- [ ] CLOUD-004 — Test signed URL scope.
+- [ ] CLOUD-005 — Test signed URL cross-account use.
+- [ ] CLOUD-006 — Test signed URL cross-tenant use.
+- [ ] CLOUD-007 — Test deleted-object access.
+- [ ] CLOUD-008 — Test replaced-object stale URLs.
+- [ ] CLOUD-009 — Test bucket or container listing only where explicitly authorized.
+- [ ] CLOUD-010 — Test storage metadata leakage.
+- [ ] CLOUD-011 — Test build and deployment artifact access.
+- [ ] CLOUD-012 — Test CI logs for secrets.
+- [ ] CLOUD-013 — Test deployment preview authorization.
+- [ ] CLOUD-014 — Test environment variable exposure through first-party UI/API.
+- [ ] CLOUD-015 — Test repository, project, and pipeline object authorization.
+- [ ] CLOUD-016 — Test runner or agent registration tokens only in controlled projects.
+- [ ] CLOUD-017 — Test webhook and deployment callbacks using controlled endpoints.
+- [ ] CLOUD-018 — Test stale access after project transfer or deletion.
+- [ ] CLOUD-019 — Do not scan provider infrastructure unless explicitly listed.
+- [ ] CLOUD-020 — Do not access unrelated tenants or cloud metadata services.
+
+## Reporting, duplicate reduction, and cleanup
+
+- [ ] REPORT-001 — Reproduce every candidate from a clean browser profile.
+- [ ] REPORT-002 — Reduce reproduction to minimum steps.
+- [ ] REPORT-003 — Verify the host is in scope.
+- [ ] REPORT-004 — Verify the vulnerability class is eligible.
+- [ ] REPORT-005 — Verify realistic attacker prerequisites.
+- [ ] REPORT-006 — Verify a concrete security boundary violation.
+- [ ] REPORT-007 — Eliminate descriptive errors without impact.
+- [ ] REPORT-008 — Eliminate missing best-practice findings without impact.
+- [ ] REPORT-009 — Eliminate non-authentication rate-limit findings when excluded.
+- [ ] REPORT-010 — Eliminate open redirects without additional impact when excluded.
+- [ ] REPORT-011 — Eliminate unlikely-interaction findings without meaningful impact.
+- [ ] REPORT-012 — Search public disclosures and Hacktivity for duplicates.
+- [ ] REPORT-013 — Check product documentation for intended behavior.
+- [ ] REPORT-014 — Identify the root cause.
+- [ ] REPORT-015 — Separate different root causes.
+- [ ] REPORT-016 — Combine only chains needed to demonstrate impact.
+- [ ] REPORT-017 — Use a title containing weakness, attacker, and impact.
+- [ ] REPORT-018 — State exact attacker prerequisites.
+- [ ] REPORT-019 — State exact victim or target prerequisites.
+- [ ] REPORT-020 — Include roles and controlled objects.
+- [ ] REPORT-021 — Include exact host, path, method, and identifiers.
+- [ ] REPORT-022 — Include sanitized requests and responses.
+- [ ] REPORT-023 — Include expected versus actual behavior.
+- [ ] REPORT-024 — Include concrete impact.
+- [ ] REPORT-025 — Avoid inflated severity.
+- [ ] REPORT-026 — Include a short video when identity or state switching is hard to follow.
+- [ ] REPORT-027 — Redact tokens, cookies, emails, and unrelated data.
+- [ ] REPORT-028 — Document cleanup.
+- [ ] REPORT-029 — Revoke temporary tokens and integrations.
+- [ ] REPORT-030 — Delete or archive disposable resources.
+- [ ] REPORT-031 — Retain only minimal evidence.
+- [ ] REPORT-032 — Update the hunting log with final disposition.
+
+---
+
+
+# Global authorization execution matrix
+
+> For every item below, first capture a valid Account A request. Then change only the identity/state. Use only controlled objects. Unauthorized cases should return a privacy-preserving denial and must not leak fields, counts, existence, cursors, or side effects.
+
+## Resource — User Profile Or Account Settings
+
+- [ ] MX-0001 — Attempt to **list user profile or account settings** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0002 — Attempt to **list user profile or account settings** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0003 — Attempt to **list user profile or account settings** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0004 — Attempt to **list user profile or account settings** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0005 — Attempt to **list user profile or account settings** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0006 — Attempt to **list user profile or account settings** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0007 — Attempt to **list user profile or account settings** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0008 — Attempt to **read user profile or account settings** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0009 — Attempt to **read user profile or account settings** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0010 — Attempt to **read user profile or account settings** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0011 — Attempt to **read user profile or account settings** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0012 — Attempt to **read user profile or account settings** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0013 — Attempt to **read user profile or account settings** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0014 — Attempt to **read user profile or account settings** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0015 — Attempt to **create user profile or account settings** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0016 — Attempt to **create user profile or account settings** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0017 — Attempt to **create user profile or account settings** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0018 — Attempt to **create user profile or account settings** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0019 — Attempt to **create user profile or account settings** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0020 — Attempt to **create user profile or account settings** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0021 — Attempt to **create user profile or account settings** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0022 — Attempt to **update user profile or account settings** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0023 — Attempt to **update user profile or account settings** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0024 — Attempt to **update user profile or account settings** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0025 — Attempt to **update user profile or account settings** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0026 — Attempt to **update user profile or account settings** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0027 — Attempt to **update user profile or account settings** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0028 — Attempt to **update user profile or account settings** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0029 — Attempt to **delete user profile or account settings** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0030 — Attempt to **delete user profile or account settings** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0031 — Attempt to **delete user profile or account settings** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0032 — Attempt to **delete user profile or account settings** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0033 — Attempt to **delete user profile or account settings** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0034 — Attempt to **delete user profile or account settings** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0035 — Attempt to **delete user profile or account settings** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0036 — Attempt to **invoke state-changing action user profile or account settings** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0037 — Attempt to **invoke state-changing action user profile or account settings** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0038 — Attempt to **invoke state-changing action user profile or account settings** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0039 — Attempt to **invoke state-changing action user profile or account settings** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0040 — Attempt to **invoke state-changing action user profile or account settings** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0041 — Attempt to **invoke state-changing action user profile or account settings** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0042 — Attempt to **invoke state-changing action user profile or account settings** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Tenant, Organization, Workspace, Or Project
+
+- [ ] MX-0043 — Attempt to **list tenant, organization, workspace, or project** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0044 — Attempt to **list tenant, organization, workspace, or project** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0045 — Attempt to **list tenant, organization, workspace, or project** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0046 — Attempt to **list tenant, organization, workspace, or project** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0047 — Attempt to **list tenant, organization, workspace, or project** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0048 — Attempt to **list tenant, organization, workspace, or project** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0049 — Attempt to **list tenant, organization, workspace, or project** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0050 — Attempt to **read tenant, organization, workspace, or project** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0051 — Attempt to **read tenant, organization, workspace, or project** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0052 — Attempt to **read tenant, organization, workspace, or project** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0053 — Attempt to **read tenant, organization, workspace, or project** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0054 — Attempt to **read tenant, organization, workspace, or project** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0055 — Attempt to **read tenant, organization, workspace, or project** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0056 — Attempt to **read tenant, organization, workspace, or project** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0057 — Attempt to **create tenant, organization, workspace, or project** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0058 — Attempt to **create tenant, organization, workspace, or project** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0059 — Attempt to **create tenant, organization, workspace, or project** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0060 — Attempt to **create tenant, organization, workspace, or project** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0061 — Attempt to **create tenant, organization, workspace, or project** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0062 — Attempt to **create tenant, organization, workspace, or project** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0063 — Attempt to **create tenant, organization, workspace, or project** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0064 — Attempt to **update tenant, organization, workspace, or project** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0065 — Attempt to **update tenant, organization, workspace, or project** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0066 — Attempt to **update tenant, organization, workspace, or project** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0067 — Attempt to **update tenant, organization, workspace, or project** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0068 — Attempt to **update tenant, organization, workspace, or project** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0069 — Attempt to **update tenant, organization, workspace, or project** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0070 — Attempt to **update tenant, organization, workspace, or project** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0071 — Attempt to **delete tenant, organization, workspace, or project** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0072 — Attempt to **delete tenant, organization, workspace, or project** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0073 — Attempt to **delete tenant, organization, workspace, or project** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0074 — Attempt to **delete tenant, organization, workspace, or project** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0075 — Attempt to **delete tenant, organization, workspace, or project** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0076 — Attempt to **delete tenant, organization, workspace, or project** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0077 — Attempt to **delete tenant, organization, workspace, or project** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0078 — Attempt to **invoke state-changing action tenant, organization, workspace, or project** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0079 — Attempt to **invoke state-changing action tenant, organization, workspace, or project** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0080 — Attempt to **invoke state-changing action tenant, organization, workspace, or project** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0081 — Attempt to **invoke state-changing action tenant, organization, workspace, or project** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0082 — Attempt to **invoke state-changing action tenant, organization, workspace, or project** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0083 — Attempt to **invoke state-changing action tenant, organization, workspace, or project** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0084 — Attempt to **invoke state-changing action tenant, organization, workspace, or project** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Team, Group, Membership, Invitation, Or Role Assignment
+
+- [ ] MX-0085 — Attempt to **list team, group, membership, invitation, or role assignment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0086 — Attempt to **list team, group, membership, invitation, or role assignment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0087 — Attempt to **list team, group, membership, invitation, or role assignment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0088 — Attempt to **list team, group, membership, invitation, or role assignment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0089 — Attempt to **list team, group, membership, invitation, or role assignment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0090 — Attempt to **list team, group, membership, invitation, or role assignment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0091 — Attempt to **list team, group, membership, invitation, or role assignment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0092 — Attempt to **read team, group, membership, invitation, or role assignment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0093 — Attempt to **read team, group, membership, invitation, or role assignment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0094 — Attempt to **read team, group, membership, invitation, or role assignment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0095 — Attempt to **read team, group, membership, invitation, or role assignment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0096 — Attempt to **read team, group, membership, invitation, or role assignment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0097 — Attempt to **read team, group, membership, invitation, or role assignment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0098 — Attempt to **read team, group, membership, invitation, or role assignment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0099 — Attempt to **create team, group, membership, invitation, or role assignment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0100 — Attempt to **create team, group, membership, invitation, or role assignment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0101 — Attempt to **create team, group, membership, invitation, or role assignment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0102 — Attempt to **create team, group, membership, invitation, or role assignment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0103 — Attempt to **create team, group, membership, invitation, or role assignment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0104 — Attempt to **create team, group, membership, invitation, or role assignment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0105 — Attempt to **create team, group, membership, invitation, or role assignment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0106 — Attempt to **update team, group, membership, invitation, or role assignment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0107 — Attempt to **update team, group, membership, invitation, or role assignment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0108 — Attempt to **update team, group, membership, invitation, or role assignment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0109 — Attempt to **update team, group, membership, invitation, or role assignment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0110 — Attempt to **update team, group, membership, invitation, or role assignment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0111 — Attempt to **update team, group, membership, invitation, or role assignment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0112 — Attempt to **update team, group, membership, invitation, or role assignment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0113 — Attempt to **delete team, group, membership, invitation, or role assignment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0114 — Attempt to **delete team, group, membership, invitation, or role assignment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0115 — Attempt to **delete team, group, membership, invitation, or role assignment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0116 — Attempt to **delete team, group, membership, invitation, or role assignment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0117 — Attempt to **delete team, group, membership, invitation, or role assignment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0118 — Attempt to **delete team, group, membership, invitation, or role assignment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0119 — Attempt to **delete team, group, membership, invitation, or role assignment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0120 — Attempt to **invoke state-changing action team, group, membership, invitation, or role assignment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0121 — Attempt to **invoke state-changing action team, group, membership, invitation, or role assignment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0122 — Attempt to **invoke state-changing action team, group, membership, invitation, or role assignment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0123 — Attempt to **invoke state-changing action team, group, membership, invitation, or role assignment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0124 — Attempt to **invoke state-changing action team, group, membership, invitation, or role assignment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0125 — Attempt to **invoke state-changing action team, group, membership, invitation, or role assignment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0126 — Attempt to **invoke state-changing action team, group, membership, invitation, or role assignment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Api Key, Token Record, Service Account, Or Integration Credential
+
+- [ ] MX-0127 — Attempt to **list API key, token record, service account, or integration credential** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0128 — Attempt to **list API key, token record, service account, or integration credential** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0129 — Attempt to **list API key, token record, service account, or integration credential** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0130 — Attempt to **list API key, token record, service account, or integration credential** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0131 — Attempt to **list API key, token record, service account, or integration credential** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0132 — Attempt to **list API key, token record, service account, or integration credential** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0133 — Attempt to **list API key, token record, service account, or integration credential** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0134 — Attempt to **read API key, token record, service account, or integration credential** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0135 — Attempt to **read API key, token record, service account, or integration credential** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0136 — Attempt to **read API key, token record, service account, or integration credential** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0137 — Attempt to **read API key, token record, service account, or integration credential** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0138 — Attempt to **read API key, token record, service account, or integration credential** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0139 — Attempt to **read API key, token record, service account, or integration credential** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0140 — Attempt to **read API key, token record, service account, or integration credential** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0141 — Attempt to **create API key, token record, service account, or integration credential** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0142 — Attempt to **create API key, token record, service account, or integration credential** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0143 — Attempt to **create API key, token record, service account, or integration credential** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0144 — Attempt to **create API key, token record, service account, or integration credential** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0145 — Attempt to **create API key, token record, service account, or integration credential** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0146 — Attempt to **create API key, token record, service account, or integration credential** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0147 — Attempt to **create API key, token record, service account, or integration credential** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0148 — Attempt to **update API key, token record, service account, or integration credential** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0149 — Attempt to **update API key, token record, service account, or integration credential** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0150 — Attempt to **update API key, token record, service account, or integration credential** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0151 — Attempt to **update API key, token record, service account, or integration credential** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0152 — Attempt to **update API key, token record, service account, or integration credential** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0153 — Attempt to **update API key, token record, service account, or integration credential** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0154 — Attempt to **update API key, token record, service account, or integration credential** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0155 — Attempt to **delete API key, token record, service account, or integration credential** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0156 — Attempt to **delete API key, token record, service account, or integration credential** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0157 — Attempt to **delete API key, token record, service account, or integration credential** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0158 — Attempt to **delete API key, token record, service account, or integration credential** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0159 — Attempt to **delete API key, token record, service account, or integration credential** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0160 — Attempt to **delete API key, token record, service account, or integration credential** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0161 — Attempt to **delete API key, token record, service account, or integration credential** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0162 — Attempt to **invoke state-changing action API key, token record, service account, or integration credential** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0163 — Attempt to **invoke state-changing action API key, token record, service account, or integration credential** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0164 — Attempt to **invoke state-changing action API key, token record, service account, or integration credential** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0165 — Attempt to **invoke state-changing action API key, token record, service account, or integration credential** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0166 — Attempt to **invoke state-changing action API key, token record, service account, or integration credential** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0167 — Attempt to **invoke state-changing action API key, token record, service account, or integration credential** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0168 — Attempt to **invoke state-changing action API key, token record, service account, or integration credential** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — File, Attachment, Folder, Import, Export, Or Generated Report
+
+- [ ] MX-0169 — Attempt to **list file, attachment, folder, import, export, or generated report** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0170 — Attempt to **list file, attachment, folder, import, export, or generated report** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0171 — Attempt to **list file, attachment, folder, import, export, or generated report** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0172 — Attempt to **list file, attachment, folder, import, export, or generated report** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0173 — Attempt to **list file, attachment, folder, import, export, or generated report** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0174 — Attempt to **list file, attachment, folder, import, export, or generated report** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0175 — Attempt to **list file, attachment, folder, import, export, or generated report** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0176 — Attempt to **read file, attachment, folder, import, export, or generated report** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0177 — Attempt to **read file, attachment, folder, import, export, or generated report** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0178 — Attempt to **read file, attachment, folder, import, export, or generated report** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0179 — Attempt to **read file, attachment, folder, import, export, or generated report** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0180 — Attempt to **read file, attachment, folder, import, export, or generated report** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0181 — Attempt to **read file, attachment, folder, import, export, or generated report** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0182 — Attempt to **read file, attachment, folder, import, export, or generated report** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0183 — Attempt to **create file, attachment, folder, import, export, or generated report** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0184 — Attempt to **create file, attachment, folder, import, export, or generated report** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0185 — Attempt to **create file, attachment, folder, import, export, or generated report** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0186 — Attempt to **create file, attachment, folder, import, export, or generated report** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0187 — Attempt to **create file, attachment, folder, import, export, or generated report** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0188 — Attempt to **create file, attachment, folder, import, export, or generated report** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0189 — Attempt to **create file, attachment, folder, import, export, or generated report** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0190 — Attempt to **update file, attachment, folder, import, export, or generated report** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0191 — Attempt to **update file, attachment, folder, import, export, or generated report** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0192 — Attempt to **update file, attachment, folder, import, export, or generated report** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0193 — Attempt to **update file, attachment, folder, import, export, or generated report** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0194 — Attempt to **update file, attachment, folder, import, export, or generated report** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0195 — Attempt to **update file, attachment, folder, import, export, or generated report** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0196 — Attempt to **update file, attachment, folder, import, export, or generated report** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0197 — Attempt to **delete file, attachment, folder, import, export, or generated report** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0198 — Attempt to **delete file, attachment, folder, import, export, or generated report** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0199 — Attempt to **delete file, attachment, folder, import, export, or generated report** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0200 — Attempt to **delete file, attachment, folder, import, export, or generated report** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0201 — Attempt to **delete file, attachment, folder, import, export, or generated report** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0202 — Attempt to **delete file, attachment, folder, import, export, or generated report** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0203 — Attempt to **delete file, attachment, folder, import, export, or generated report** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0204 — Attempt to **invoke state-changing action file, attachment, folder, import, export, or generated report** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0205 — Attempt to **invoke state-changing action file, attachment, folder, import, export, or generated report** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0206 — Attempt to **invoke state-changing action file, attachment, folder, import, export, or generated report** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0207 — Attempt to **invoke state-changing action file, attachment, folder, import, export, or generated report** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0208 — Attempt to **invoke state-changing action file, attachment, folder, import, export, or generated report** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0209 — Attempt to **invoke state-changing action file, attachment, folder, import, export, or generated report** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0210 — Attempt to **invoke state-changing action file, attachment, folder, import, export, or generated report** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Message, Conversation, Comment, Note, Or Notification
+
+- [ ] MX-0211 — Attempt to **list message, conversation, comment, note, or notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0212 — Attempt to **list message, conversation, comment, note, or notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0213 — Attempt to **list message, conversation, comment, note, or notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0214 — Attempt to **list message, conversation, comment, note, or notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0215 — Attempt to **list message, conversation, comment, note, or notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0216 — Attempt to **list message, conversation, comment, note, or notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0217 — Attempt to **list message, conversation, comment, note, or notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0218 — Attempt to **read message, conversation, comment, note, or notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0219 — Attempt to **read message, conversation, comment, note, or notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0220 — Attempt to **read message, conversation, comment, note, or notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0221 — Attempt to **read message, conversation, comment, note, or notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0222 — Attempt to **read message, conversation, comment, note, or notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0223 — Attempt to **read message, conversation, comment, note, or notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0224 — Attempt to **read message, conversation, comment, note, or notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0225 — Attempt to **create message, conversation, comment, note, or notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0226 — Attempt to **create message, conversation, comment, note, or notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0227 — Attempt to **create message, conversation, comment, note, or notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0228 — Attempt to **create message, conversation, comment, note, or notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0229 — Attempt to **create message, conversation, comment, note, or notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0230 — Attempt to **create message, conversation, comment, note, or notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0231 — Attempt to **create message, conversation, comment, note, or notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0232 — Attempt to **update message, conversation, comment, note, or notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0233 — Attempt to **update message, conversation, comment, note, or notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0234 — Attempt to **update message, conversation, comment, note, or notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0235 — Attempt to **update message, conversation, comment, note, or notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0236 — Attempt to **update message, conversation, comment, note, or notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0237 — Attempt to **update message, conversation, comment, note, or notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0238 — Attempt to **update message, conversation, comment, note, or notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0239 — Attempt to **delete message, conversation, comment, note, or notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0240 — Attempt to **delete message, conversation, comment, note, or notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0241 — Attempt to **delete message, conversation, comment, note, or notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0242 — Attempt to **delete message, conversation, comment, note, or notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0243 — Attempt to **delete message, conversation, comment, note, or notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0244 — Attempt to **delete message, conversation, comment, note, or notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0245 — Attempt to **delete message, conversation, comment, note, or notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0246 — Attempt to **invoke state-changing action message, conversation, comment, note, or notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0247 — Attempt to **invoke state-changing action message, conversation, comment, note, or notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0248 — Attempt to **invoke state-changing action message, conversation, comment, note, or notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0249 — Attempt to **invoke state-changing action message, conversation, comment, note, or notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0250 — Attempt to **invoke state-changing action message, conversation, comment, note, or notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0251 — Attempt to **invoke state-changing action message, conversation, comment, note, or notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0252 — Attempt to **invoke state-changing action message, conversation, comment, note, or notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Task, Ticket, Issue, Finding, Workflow Item, Or Approval
+
+- [ ] MX-0253 — Attempt to **list task, ticket, issue, finding, workflow item, or approval** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0254 — Attempt to **list task, ticket, issue, finding, workflow item, or approval** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0255 — Attempt to **list task, ticket, issue, finding, workflow item, or approval** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0256 — Attempt to **list task, ticket, issue, finding, workflow item, or approval** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0257 — Attempt to **list task, ticket, issue, finding, workflow item, or approval** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0258 — Attempt to **list task, ticket, issue, finding, workflow item, or approval** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0259 — Attempt to **list task, ticket, issue, finding, workflow item, or approval** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0260 — Attempt to **read task, ticket, issue, finding, workflow item, or approval** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0261 — Attempt to **read task, ticket, issue, finding, workflow item, or approval** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0262 — Attempt to **read task, ticket, issue, finding, workflow item, or approval** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0263 — Attempt to **read task, ticket, issue, finding, workflow item, or approval** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0264 — Attempt to **read task, ticket, issue, finding, workflow item, or approval** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0265 — Attempt to **read task, ticket, issue, finding, workflow item, or approval** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0266 — Attempt to **read task, ticket, issue, finding, workflow item, or approval** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0267 — Attempt to **create task, ticket, issue, finding, workflow item, or approval** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0268 — Attempt to **create task, ticket, issue, finding, workflow item, or approval** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0269 — Attempt to **create task, ticket, issue, finding, workflow item, or approval** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0270 — Attempt to **create task, ticket, issue, finding, workflow item, or approval** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0271 — Attempt to **create task, ticket, issue, finding, workflow item, or approval** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0272 — Attempt to **create task, ticket, issue, finding, workflow item, or approval** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0273 — Attempt to **create task, ticket, issue, finding, workflow item, or approval** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0274 — Attempt to **update task, ticket, issue, finding, workflow item, or approval** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0275 — Attempt to **update task, ticket, issue, finding, workflow item, or approval** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0276 — Attempt to **update task, ticket, issue, finding, workflow item, or approval** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0277 — Attempt to **update task, ticket, issue, finding, workflow item, or approval** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0278 — Attempt to **update task, ticket, issue, finding, workflow item, or approval** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0279 — Attempt to **update task, ticket, issue, finding, workflow item, or approval** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0280 — Attempt to **update task, ticket, issue, finding, workflow item, or approval** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0281 — Attempt to **delete task, ticket, issue, finding, workflow item, or approval** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0282 — Attempt to **delete task, ticket, issue, finding, workflow item, or approval** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0283 — Attempt to **delete task, ticket, issue, finding, workflow item, or approval** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0284 — Attempt to **delete task, ticket, issue, finding, workflow item, or approval** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0285 — Attempt to **delete task, ticket, issue, finding, workflow item, or approval** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0286 — Attempt to **delete task, ticket, issue, finding, workflow item, or approval** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0287 — Attempt to **delete task, ticket, issue, finding, workflow item, or approval** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0288 — Attempt to **invoke state-changing action task, ticket, issue, finding, workflow item, or approval** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0289 — Attempt to **invoke state-changing action task, ticket, issue, finding, workflow item, or approval** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0290 — Attempt to **invoke state-changing action task, ticket, issue, finding, workflow item, or approval** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0291 — Attempt to **invoke state-changing action task, ticket, issue, finding, workflow item, or approval** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0292 — Attempt to **invoke state-changing action task, ticket, issue, finding, workflow item, or approval** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0293 — Attempt to **invoke state-changing action task, ticket, issue, finding, workflow item, or approval** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0294 — Attempt to **invoke state-changing action task, ticket, issue, finding, workflow item, or approval** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Repository, Branch, Pull Request, Pipeline, Job, Or Deployment
+
+- [ ] MX-0295 — Attempt to **list repository, branch, pull request, pipeline, job, or deployment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0296 — Attempt to **list repository, branch, pull request, pipeline, job, or deployment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0297 — Attempt to **list repository, branch, pull request, pipeline, job, or deployment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0298 — Attempt to **list repository, branch, pull request, pipeline, job, or deployment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0299 — Attempt to **list repository, branch, pull request, pipeline, job, or deployment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0300 — Attempt to **list repository, branch, pull request, pipeline, job, or deployment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0301 — Attempt to **list repository, branch, pull request, pipeline, job, or deployment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0302 — Attempt to **read repository, branch, pull request, pipeline, job, or deployment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0303 — Attempt to **read repository, branch, pull request, pipeline, job, or deployment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0304 — Attempt to **read repository, branch, pull request, pipeline, job, or deployment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0305 — Attempt to **read repository, branch, pull request, pipeline, job, or deployment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0306 — Attempt to **read repository, branch, pull request, pipeline, job, or deployment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0307 — Attempt to **read repository, branch, pull request, pipeline, job, or deployment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0308 — Attempt to **read repository, branch, pull request, pipeline, job, or deployment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0309 — Attempt to **create repository, branch, pull request, pipeline, job, or deployment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0310 — Attempt to **create repository, branch, pull request, pipeline, job, or deployment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0311 — Attempt to **create repository, branch, pull request, pipeline, job, or deployment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0312 — Attempt to **create repository, branch, pull request, pipeline, job, or deployment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0313 — Attempt to **create repository, branch, pull request, pipeline, job, or deployment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0314 — Attempt to **create repository, branch, pull request, pipeline, job, or deployment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0315 — Attempt to **create repository, branch, pull request, pipeline, job, or deployment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0316 — Attempt to **update repository, branch, pull request, pipeline, job, or deployment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0317 — Attempt to **update repository, branch, pull request, pipeline, job, or deployment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0318 — Attempt to **update repository, branch, pull request, pipeline, job, or deployment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0319 — Attempt to **update repository, branch, pull request, pipeline, job, or deployment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0320 — Attempt to **update repository, branch, pull request, pipeline, job, or deployment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0321 — Attempt to **update repository, branch, pull request, pipeline, job, or deployment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0322 — Attempt to **update repository, branch, pull request, pipeline, job, or deployment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0323 — Attempt to **delete repository, branch, pull request, pipeline, job, or deployment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0324 — Attempt to **delete repository, branch, pull request, pipeline, job, or deployment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0325 — Attempt to **delete repository, branch, pull request, pipeline, job, or deployment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0326 — Attempt to **delete repository, branch, pull request, pipeline, job, or deployment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0327 — Attempt to **delete repository, branch, pull request, pipeline, job, or deployment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0328 — Attempt to **delete repository, branch, pull request, pipeline, job, or deployment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0329 — Attempt to **delete repository, branch, pull request, pipeline, job, or deployment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0330 — Attempt to **invoke state-changing action repository, branch, pull request, pipeline, job, or deployment** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0331 — Attempt to **invoke state-changing action repository, branch, pull request, pipeline, job, or deployment** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0332 — Attempt to **invoke state-changing action repository, branch, pull request, pipeline, job, or deployment** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0333 — Attempt to **invoke state-changing action repository, branch, pull request, pipeline, job, or deployment** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0334 — Attempt to **invoke state-changing action repository, branch, pull request, pipeline, job, or deployment** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0335 — Attempt to **invoke state-changing action repository, branch, pull request, pipeline, job, or deployment** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0336 — Attempt to **invoke state-changing action repository, branch, pull request, pipeline, job, or deployment** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Webhook, Callback, Integration, Connector, Or Scheduled Job
+
+- [ ] MX-0337 — Attempt to **list webhook, callback, integration, connector, or scheduled job** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0338 — Attempt to **list webhook, callback, integration, connector, or scheduled job** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0339 — Attempt to **list webhook, callback, integration, connector, or scheduled job** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0340 — Attempt to **list webhook, callback, integration, connector, or scheduled job** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0341 — Attempt to **list webhook, callback, integration, connector, or scheduled job** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0342 — Attempt to **list webhook, callback, integration, connector, or scheduled job** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0343 — Attempt to **list webhook, callback, integration, connector, or scheduled job** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0344 — Attempt to **read webhook, callback, integration, connector, or scheduled job** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0345 — Attempt to **read webhook, callback, integration, connector, or scheduled job** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0346 — Attempt to **read webhook, callback, integration, connector, or scheduled job** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0347 — Attempt to **read webhook, callback, integration, connector, or scheduled job** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0348 — Attempt to **read webhook, callback, integration, connector, or scheduled job** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0349 — Attempt to **read webhook, callback, integration, connector, or scheduled job** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0350 — Attempt to **read webhook, callback, integration, connector, or scheduled job** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0351 — Attempt to **create webhook, callback, integration, connector, or scheduled job** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0352 — Attempt to **create webhook, callback, integration, connector, or scheduled job** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0353 — Attempt to **create webhook, callback, integration, connector, or scheduled job** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0354 — Attempt to **create webhook, callback, integration, connector, or scheduled job** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0355 — Attempt to **create webhook, callback, integration, connector, or scheduled job** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0356 — Attempt to **create webhook, callback, integration, connector, or scheduled job** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0357 — Attempt to **create webhook, callback, integration, connector, or scheduled job** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0358 — Attempt to **update webhook, callback, integration, connector, or scheduled job** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0359 — Attempt to **update webhook, callback, integration, connector, or scheduled job** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0360 — Attempt to **update webhook, callback, integration, connector, or scheduled job** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0361 — Attempt to **update webhook, callback, integration, connector, or scheduled job** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0362 — Attempt to **update webhook, callback, integration, connector, or scheduled job** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0363 — Attempt to **update webhook, callback, integration, connector, or scheduled job** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0364 — Attempt to **update webhook, callback, integration, connector, or scheduled job** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0365 — Attempt to **delete webhook, callback, integration, connector, or scheduled job** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0366 — Attempt to **delete webhook, callback, integration, connector, or scheduled job** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0367 — Attempt to **delete webhook, callback, integration, connector, or scheduled job** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0368 — Attempt to **delete webhook, callback, integration, connector, or scheduled job** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0369 — Attempt to **delete webhook, callback, integration, connector, or scheduled job** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0370 — Attempt to **delete webhook, callback, integration, connector, or scheduled job** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0371 — Attempt to **delete webhook, callback, integration, connector, or scheduled job** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0372 — Attempt to **invoke state-changing action webhook, callback, integration, connector, or scheduled job** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0373 — Attempt to **invoke state-changing action webhook, callback, integration, connector, or scheduled job** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0374 — Attempt to **invoke state-changing action webhook, callback, integration, connector, or scheduled job** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0375 — Attempt to **invoke state-changing action webhook, callback, integration, connector, or scheduled job** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0376 — Attempt to **invoke state-changing action webhook, callback, integration, connector, or scheduled job** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0377 — Attempt to **invoke state-changing action webhook, callback, integration, connector, or scheduled job** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0378 — Attempt to **invoke state-changing action webhook, callback, integration, connector, or scheduled job** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Audit Log, Activity Feed, Event History, Or Security Log
+
+- [ ] MX-0379 — Attempt to **list audit log, activity feed, event history, or security log** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0380 — Attempt to **list audit log, activity feed, event history, or security log** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0381 — Attempt to **list audit log, activity feed, event history, or security log** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0382 — Attempt to **list audit log, activity feed, event history, or security log** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0383 — Attempt to **list audit log, activity feed, event history, or security log** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0384 — Attempt to **list audit log, activity feed, event history, or security log** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0385 — Attempt to **list audit log, activity feed, event history, or security log** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0386 — Attempt to **read audit log, activity feed, event history, or security log** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0387 — Attempt to **read audit log, activity feed, event history, or security log** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0388 — Attempt to **read audit log, activity feed, event history, or security log** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0389 — Attempt to **read audit log, activity feed, event history, or security log** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0390 — Attempt to **read audit log, activity feed, event history, or security log** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0391 — Attempt to **read audit log, activity feed, event history, or security log** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0392 — Attempt to **read audit log, activity feed, event history, or security log** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0393 — Attempt to **create audit log, activity feed, event history, or security log** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0394 — Attempt to **create audit log, activity feed, event history, or security log** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0395 — Attempt to **create audit log, activity feed, event history, or security log** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0396 — Attempt to **create audit log, activity feed, event history, or security log** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0397 — Attempt to **create audit log, activity feed, event history, or security log** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0398 — Attempt to **create audit log, activity feed, event history, or security log** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0399 — Attempt to **create audit log, activity feed, event history, or security log** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0400 — Attempt to **update audit log, activity feed, event history, or security log** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0401 — Attempt to **update audit log, activity feed, event history, or security log** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0402 — Attempt to **update audit log, activity feed, event history, or security log** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0403 — Attempt to **update audit log, activity feed, event history, or security log** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0404 — Attempt to **update audit log, activity feed, event history, or security log** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0405 — Attempt to **update audit log, activity feed, event history, or security log** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0406 — Attempt to **update audit log, activity feed, event history, or security log** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0407 — Attempt to **delete audit log, activity feed, event history, or security log** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0408 — Attempt to **delete audit log, activity feed, event history, or security log** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0409 — Attempt to **delete audit log, activity feed, event history, or security log** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0410 — Attempt to **delete audit log, activity feed, event history, or security log** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0411 — Attempt to **delete audit log, activity feed, event history, or security log** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0412 — Attempt to **delete audit log, activity feed, event history, or security log** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0413 — Attempt to **delete audit log, activity feed, event history, or security log** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0414 — Attempt to **invoke state-changing action audit log, activity feed, event history, or security log** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0415 — Attempt to **invoke state-changing action audit log, activity feed, event history, or security log** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0416 — Attempt to **invoke state-changing action audit log, activity feed, event history, or security log** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0417 — Attempt to **invoke state-changing action audit log, activity feed, event history, or security log** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0418 — Attempt to **invoke state-changing action audit log, activity feed, event history, or security log** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0419 — Attempt to **invoke state-changing action audit log, activity feed, event history, or security log** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0420 — Attempt to **invoke state-changing action audit log, activity feed, event history, or security log** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Search Result, Autocomplete Result, Count, Aggregate, Chart, Or Dashboard Widget
+
+- [ ] MX-0421 — Attempt to **list search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0422 — Attempt to **list search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0423 — Attempt to **list search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0424 — Attempt to **list search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0425 — Attempt to **list search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0426 — Attempt to **list search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0427 — Attempt to **list search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0428 — Attempt to **read search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0429 — Attempt to **read search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0430 — Attempt to **read search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0431 — Attempt to **read search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0432 — Attempt to **read search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0433 — Attempt to **read search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0434 — Attempt to **read search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0435 — Attempt to **create search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0436 — Attempt to **create search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0437 — Attempt to **create search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0438 — Attempt to **create search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0439 — Attempt to **create search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0440 — Attempt to **create search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0441 — Attempt to **create search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0442 — Attempt to **update search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0443 — Attempt to **update search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0444 — Attempt to **update search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0445 — Attempt to **update search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0446 — Attempt to **update search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0447 — Attempt to **update search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0448 — Attempt to **update search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0449 — Attempt to **delete search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0450 — Attempt to **delete search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0451 — Attempt to **delete search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0452 — Attempt to **delete search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0453 — Attempt to **delete search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0454 — Attempt to **delete search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0455 — Attempt to **delete search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0456 — Attempt to **invoke state-changing action search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0457 — Attempt to **invoke state-changing action search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0458 — Attempt to **invoke state-changing action search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0459 — Attempt to **invoke state-changing action search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0460 — Attempt to **invoke state-changing action search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0461 — Attempt to **invoke state-changing action search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0462 — Attempt to **invoke state-changing action search result, autocomplete result, count, aggregate, chart, or dashboard widget** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Invoice, Receipt, Subscription, Entitlement, Payment, Refund, Coupon, Or Credit
+
+- [ ] MX-0463 — Attempt to **list invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0464 — Attempt to **list invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0465 — Attempt to **list invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0466 — Attempt to **list invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0467 — Attempt to **list invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0468 — Attempt to **list invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0469 — Attempt to **list invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0470 — Attempt to **read invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0471 — Attempt to **read invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0472 — Attempt to **read invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0473 — Attempt to **read invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0474 — Attempt to **read invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0475 — Attempt to **read invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0476 — Attempt to **read invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0477 — Attempt to **create invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0478 — Attempt to **create invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0479 — Attempt to **create invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0480 — Attempt to **create invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0481 — Attempt to **create invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0482 — Attempt to **create invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0483 — Attempt to **create invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0484 — Attempt to **update invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0485 — Attempt to **update invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0486 — Attempt to **update invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0487 — Attempt to **update invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0488 — Attempt to **update invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0489 — Attempt to **update invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0490 — Attempt to **update invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0491 — Attempt to **delete invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0492 — Attempt to **delete invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0493 — Attempt to **delete invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0494 — Attempt to **delete invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0495 — Attempt to **delete invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0496 — Attempt to **delete invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0497 — Attempt to **delete invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0498 — Attempt to **invoke state-changing action invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0499 — Attempt to **invoke state-changing action invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0500 — Attempt to **invoke state-changing action invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0501 — Attempt to **invoke state-changing action invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0502 — Attempt to **invoke state-changing action invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0503 — Attempt to **invoke state-changing action invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0504 — Attempt to **invoke state-changing action invoice, receipt, subscription, entitlement, payment, refund, coupon, or credit** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Support, Moderation, Impersonation, Or Administrative Object
+
+- [ ] MX-0505 — Attempt to **list support, moderation, impersonation, or administrative object** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0506 — Attempt to **list support, moderation, impersonation, or administrative object** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0507 — Attempt to **list support, moderation, impersonation, or administrative object** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0508 — Attempt to **list support, moderation, impersonation, or administrative object** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0509 — Attempt to **list support, moderation, impersonation, or administrative object** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0510 — Attempt to **list support, moderation, impersonation, or administrative object** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0511 — Attempt to **list support, moderation, impersonation, or administrative object** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0512 — Attempt to **read support, moderation, impersonation, or administrative object** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0513 — Attempt to **read support, moderation, impersonation, or administrative object** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0514 — Attempt to **read support, moderation, impersonation, or administrative object** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0515 — Attempt to **read support, moderation, impersonation, or administrative object** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0516 — Attempt to **read support, moderation, impersonation, or administrative object** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0517 — Attempt to **read support, moderation, impersonation, or administrative object** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0518 — Attempt to **read support, moderation, impersonation, or administrative object** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0519 — Attempt to **create support, moderation, impersonation, or administrative object** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0520 — Attempt to **create support, moderation, impersonation, or administrative object** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0521 — Attempt to **create support, moderation, impersonation, or administrative object** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0522 — Attempt to **create support, moderation, impersonation, or administrative object** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0523 — Attempt to **create support, moderation, impersonation, or administrative object** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0524 — Attempt to **create support, moderation, impersonation, or administrative object** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0525 — Attempt to **create support, moderation, impersonation, or administrative object** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0526 — Attempt to **update support, moderation, impersonation, or administrative object** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0527 — Attempt to **update support, moderation, impersonation, or administrative object** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0528 — Attempt to **update support, moderation, impersonation, or administrative object** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0529 — Attempt to **update support, moderation, impersonation, or administrative object** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0530 — Attempt to **update support, moderation, impersonation, or administrative object** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0531 — Attempt to **update support, moderation, impersonation, or administrative object** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0532 — Attempt to **update support, moderation, impersonation, or administrative object** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0533 — Attempt to **delete support, moderation, impersonation, or administrative object** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0534 — Attempt to **delete support, moderation, impersonation, or administrative object** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0535 — Attempt to **delete support, moderation, impersonation, or administrative object** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0536 — Attempt to **delete support, moderation, impersonation, or administrative object** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0537 — Attempt to **delete support, moderation, impersonation, or administrative object** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0538 — Attempt to **delete support, moderation, impersonation, or administrative object** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0539 — Attempt to **delete support, moderation, impersonation, or administrative object** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0540 — Attempt to **invoke state-changing action support, moderation, impersonation, or administrative object** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0541 — Attempt to **invoke state-changing action support, moderation, impersonation, or administrative object** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0542 — Attempt to **invoke state-changing action support, moderation, impersonation, or administrative object** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0543 — Attempt to **invoke state-changing action support, moderation, impersonation, or administrative object** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0544 — Attempt to **invoke state-changing action support, moderation, impersonation, or administrative object** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0545 — Attempt to **invoke state-changing action support, moderation, impersonation, or administrative object** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0546 — Attempt to **invoke state-changing action support, moderation, impersonation, or administrative object** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Password-Reset, Verification, Invitation, Mfa, Oauth, Or Recovery Artifact
+
+- [ ] MX-0547 — Attempt to **list password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0548 — Attempt to **list password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0549 — Attempt to **list password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0550 — Attempt to **list password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0551 — Attempt to **list password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0552 — Attempt to **list password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0553 — Attempt to **list password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0554 — Attempt to **read password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0555 — Attempt to **read password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0556 — Attempt to **read password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0557 — Attempt to **read password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0558 — Attempt to **read password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0559 — Attempt to **read password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0560 — Attempt to **read password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0561 — Attempt to **create password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0562 — Attempt to **create password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0563 — Attempt to **create password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0564 — Attempt to **create password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0565 — Attempt to **create password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0566 — Attempt to **create password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0567 — Attempt to **create password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0568 — Attempt to **update password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0569 — Attempt to **update password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0570 — Attempt to **update password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0571 — Attempt to **update password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0572 — Attempt to **update password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0573 — Attempt to **update password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0574 — Attempt to **update password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0575 — Attempt to **delete password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0576 — Attempt to **delete password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0577 — Attempt to **delete password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0578 — Attempt to **delete password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0579 — Attempt to **delete password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0580 — Attempt to **delete password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0581 — Attempt to **delete password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0582 — Attempt to **invoke state-changing action password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0583 — Attempt to **invoke state-changing action password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0584 — Attempt to **invoke state-changing action password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0585 — Attempt to **invoke state-changing action password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0586 — Attempt to **invoke state-changing action password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0587 — Attempt to **invoke state-changing action password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0588 — Attempt to **invoke state-changing action password-reset, verification, invitation, MFA, OAuth, or recovery artifact** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Signed Url, Download Link, Preview, Thumbnail, Or Transformed File
+
+- [ ] MX-0589 — Attempt to **list signed URL, download link, preview, thumbnail, or transformed file** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0590 — Attempt to **list signed URL, download link, preview, thumbnail, or transformed file** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0591 — Attempt to **list signed URL, download link, preview, thumbnail, or transformed file** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0592 — Attempt to **list signed URL, download link, preview, thumbnail, or transformed file** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0593 — Attempt to **list signed URL, download link, preview, thumbnail, or transformed file** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0594 — Attempt to **list signed URL, download link, preview, thumbnail, or transformed file** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0595 — Attempt to **list signed URL, download link, preview, thumbnail, or transformed file** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0596 — Attempt to **read signed URL, download link, preview, thumbnail, or transformed file** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0597 — Attempt to **read signed URL, download link, preview, thumbnail, or transformed file** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0598 — Attempt to **read signed URL, download link, preview, thumbnail, or transformed file** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0599 — Attempt to **read signed URL, download link, preview, thumbnail, or transformed file** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0600 — Attempt to **read signed URL, download link, preview, thumbnail, or transformed file** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0601 — Attempt to **read signed URL, download link, preview, thumbnail, or transformed file** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0602 — Attempt to **read signed URL, download link, preview, thumbnail, or transformed file** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0603 — Attempt to **create signed URL, download link, preview, thumbnail, or transformed file** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0604 — Attempt to **create signed URL, download link, preview, thumbnail, or transformed file** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0605 — Attempt to **create signed URL, download link, preview, thumbnail, or transformed file** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0606 — Attempt to **create signed URL, download link, preview, thumbnail, or transformed file** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0607 — Attempt to **create signed URL, download link, preview, thumbnail, or transformed file** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0608 — Attempt to **create signed URL, download link, preview, thumbnail, or transformed file** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0609 — Attempt to **create signed URL, download link, preview, thumbnail, or transformed file** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0610 — Attempt to **update signed URL, download link, preview, thumbnail, or transformed file** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0611 — Attempt to **update signed URL, download link, preview, thumbnail, or transformed file** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0612 — Attempt to **update signed URL, download link, preview, thumbnail, or transformed file** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0613 — Attempt to **update signed URL, download link, preview, thumbnail, or transformed file** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0614 — Attempt to **update signed URL, download link, preview, thumbnail, or transformed file** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0615 — Attempt to **update signed URL, download link, preview, thumbnail, or transformed file** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0616 — Attempt to **update signed URL, download link, preview, thumbnail, or transformed file** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0617 — Attempt to **delete signed URL, download link, preview, thumbnail, or transformed file** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0618 — Attempt to **delete signed URL, download link, preview, thumbnail, or transformed file** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0619 — Attempt to **delete signed URL, download link, preview, thumbnail, or transformed file** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0620 — Attempt to **delete signed URL, download link, preview, thumbnail, or transformed file** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0621 — Attempt to **delete signed URL, download link, preview, thumbnail, or transformed file** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0622 — Attempt to **delete signed URL, download link, preview, thumbnail, or transformed file** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0623 — Attempt to **delete signed URL, download link, preview, thumbnail, or transformed file** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0624 — Attempt to **invoke state-changing action signed URL, download link, preview, thumbnail, or transformed file** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0625 — Attempt to **invoke state-changing action signed URL, download link, preview, thumbnail, or transformed file** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0626 — Attempt to **invoke state-changing action signed URL, download link, preview, thumbnail, or transformed file** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0627 — Attempt to **invoke state-changing action signed URL, download link, preview, thumbnail, or transformed file** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0628 — Attempt to **invoke state-changing action signed URL, download link, preview, thumbnail, or transformed file** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0629 — Attempt to **invoke state-changing action signed URL, download link, preview, thumbnail, or transformed file** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0630 — Attempt to **invoke state-changing action signed URL, download link, preview, thumbnail, or transformed file** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Real-Time Channel, Websocket Topic, Sse Stream, Or Push Notification
+
+- [ ] MX-0631 — Attempt to **list real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0632 — Attempt to **list real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0633 — Attempt to **list real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0634 — Attempt to **list real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0635 — Attempt to **list real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0636 — Attempt to **list real-time channel, WebSocket topic, SSE stream, or push notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0637 — Attempt to **list real-time channel, WebSocket topic, SSE stream, or push notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0638 — Attempt to **read real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0639 — Attempt to **read real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0640 — Attempt to **read real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0641 — Attempt to **read real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0642 — Attempt to **read real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0643 — Attempt to **read real-time channel, WebSocket topic, SSE stream, or push notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0644 — Attempt to **read real-time channel, WebSocket topic, SSE stream, or push notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0645 — Attempt to **create real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0646 — Attempt to **create real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0647 — Attempt to **create real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0648 — Attempt to **create real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0649 — Attempt to **create real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0650 — Attempt to **create real-time channel, WebSocket topic, SSE stream, or push notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0651 — Attempt to **create real-time channel, WebSocket topic, SSE stream, or push notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0652 — Attempt to **update real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0653 — Attempt to **update real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0654 — Attempt to **update real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0655 — Attempt to **update real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0656 — Attempt to **update real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0657 — Attempt to **update real-time channel, WebSocket topic, SSE stream, or push notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0658 — Attempt to **update real-time channel, WebSocket topic, SSE stream, or push notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0659 — Attempt to **delete real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0660 — Attempt to **delete real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0661 — Attempt to **delete real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0662 — Attempt to **delete real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0663 — Attempt to **delete real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0664 — Attempt to **delete real-time channel, WebSocket topic, SSE stream, or push notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0665 — Attempt to **delete real-time channel, WebSocket topic, SSE stream, or push notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0666 — Attempt to **invoke state-changing action real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0667 — Attempt to **invoke state-changing action real-time channel, WebSocket topic, SSE stream, or push notification** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0668 — Attempt to **invoke state-changing action real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0669 — Attempt to **invoke state-changing action real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0670 — Attempt to **invoke state-changing action real-time channel, WebSocket topic, SSE stream, or push notification** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0671 — Attempt to **invoke state-changing action real-time channel, WebSocket topic, SSE stream, or push notification** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0672 — Attempt to **invoke state-changing action real-time channel, WebSocket topic, SSE stream, or push notification** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Feature Flag, Plan Setting, Billing Gate, Tenant Default, Or Product Configuration
+
+- [ ] MX-0673 — Attempt to **list feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0674 — Attempt to **list feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0675 — Attempt to **list feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0676 — Attempt to **list feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0677 — Attempt to **list feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0678 — Attempt to **list feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0679 — Attempt to **list feature flag, plan setting, billing gate, tenant default, or product configuration** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0680 — Attempt to **read feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0681 — Attempt to **read feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0682 — Attempt to **read feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0683 — Attempt to **read feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0684 — Attempt to **read feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0685 — Attempt to **read feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0686 — Attempt to **read feature flag, plan setting, billing gate, tenant default, or product configuration** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0687 — Attempt to **create feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0688 — Attempt to **create feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0689 — Attempt to **create feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0690 — Attempt to **create feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0691 — Attempt to **create feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0692 — Attempt to **create feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0693 — Attempt to **create feature flag, plan setting, billing gate, tenant default, or product configuration** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0694 — Attempt to **update feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0695 — Attempt to **update feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0696 — Attempt to **update feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0697 — Attempt to **update feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0698 — Attempt to **update feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0699 — Attempt to **update feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0700 — Attempt to **update feature flag, plan setting, billing gate, tenant default, or product configuration** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0701 — Attempt to **delete feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0702 — Attempt to **delete feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0703 — Attempt to **delete feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0704 — Attempt to **delete feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0705 — Attempt to **delete feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0706 — Attempt to **delete feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0707 — Attempt to **delete feature flag, plan setting, billing gate, tenant default, or product configuration** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0708 — Attempt to **invoke state-changing action feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0709 — Attempt to **invoke state-changing action feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0710 — Attempt to **invoke state-changing action feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0711 — Attempt to **invoke state-changing action feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0712 — Attempt to **invoke state-changing action feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0713 — Attempt to **invoke state-changing action feature flag, plan setting, billing gate, tenant default, or product configuration** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0714 — Attempt to **invoke state-changing action feature flag, plan setting, billing gate, tenant default, or product configuration** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+## Resource — Background Job, Queue Item, Confirmation Artifact, State Transition, Or Bulk Operation
+
+- [ ] MX-0715 — Attempt to **list background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0716 — Attempt to **list background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0717 — Attempt to **list background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0718 — Attempt to **list background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0719 — Attempt to **list background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0720 — Attempt to **list background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0721 — Attempt to **list background job, queue item, confirmation artifact, state transition, or bulk operation** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0722 — Attempt to **read background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0723 — Attempt to **read background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0724 — Attempt to **read background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0725 — Attempt to **read background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0726 — Attempt to **read background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0727 — Attempt to **read background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0728 — Attempt to **read background job, queue item, confirmation artifact, state transition, or bulk operation** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0729 — Attempt to **create background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0730 — Attempt to **create background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0731 — Attempt to **create background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0732 — Attempt to **create background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0733 — Attempt to **create background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0734 — Attempt to **create background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0735 — Attempt to **create background job, queue item, confirmation artifact, state transition, or bulk operation** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0736 — Attempt to **update background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0737 — Attempt to **update background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0738 — Attempt to **update background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0739 — Attempt to **update background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0740 — Attempt to **update background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0741 — Attempt to **update background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0742 — Attempt to **update background job, queue item, confirmation artifact, state transition, or bulk operation** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0743 — Attempt to **delete background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0744 — Attempt to **delete background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0745 — Attempt to **delete background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0746 — Attempt to **delete background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0747 — Attempt to **delete background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0748 — Attempt to **delete background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0749 — Attempt to **delete background job, queue item, confirmation artifact, state transition, or bulk operation** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0750 — Attempt to **invoke state-changing action background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0751 — Attempt to **invoke state-changing action background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account A as admin but not owner**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0752 — Attempt to **invoke state-changing action background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as editor or contributor**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0753 — Attempt to **invoke state-changing action background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as viewer, guest, or external collaborator**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0754 — Attempt to **invoke state-changing action background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account B as tenant member without resource access**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0755 — Attempt to **invoke state-changing action background job, queue item, confirmation artifact, state transition, or bulk operation** as **Account C as complete outsider**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+- [ ] MX-0756 — Attempt to **invoke state-changing action background job, queue item, confirmation artifact, state transition, or bulk operation** as **a stale session after downgrade, removal, suspension, or token revocation**; change no unrelated variables and record status, response fields, headers, timing, object-existence leakage, and side effects.
+
+---
+
+# Parent-child and cross-tenant object-mixing matrix
+
+## Tenant Or Organization → workspace or project
+
+- [ ] PAIR-001 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-002 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-003 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-004 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-005 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-006 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-007 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-008 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-009 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-010 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-011 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-012 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-013 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-014 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-015 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-016 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-017 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-018 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-019 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-020 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Workspace Or Project → task, ticket, issue, or workflow item
+
+- [ ] PAIR-021 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-022 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-023 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-024 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-025 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-026 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-027 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-028 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-029 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-030 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-031 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-032 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-033 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-034 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-035 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-036 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-037 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-038 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-039 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-040 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Workspace Or Project → file, export, or report
+
+- [ ] PAIR-041 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-042 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-043 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-044 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-045 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-046 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-047 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-048 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-049 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-050 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-051 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-052 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-053 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-054 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-055 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-056 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-057 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-058 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-059 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-060 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Team Or Group → membership, invitation, or role
+
+- [ ] PAIR-061 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-062 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-063 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-064 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-065 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-066 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-067 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-068 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-069 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-070 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-071 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-072 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-073 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-074 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-075 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-076 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-077 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-078 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-079 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-080 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Account Or Tenant → API key, token, service account, or integration
+
+- [ ] PAIR-081 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-082 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-083 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-084 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-085 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-086 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-087 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-088 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-089 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-090 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-091 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-092 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-093 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-094 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-095 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-096 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-097 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-098 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-099 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-100 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Repository Or Project → branch, pull request, pipeline, job, or deployment
+
+- [ ] PAIR-101 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-102 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-103 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-104 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-105 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-106 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-107 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-108 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-109 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-110 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-111 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-112 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-113 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-114 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-115 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-116 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-117 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-118 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-119 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-120 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Invoice Or Subscription → payment, refund, credit, coupon, or entitlement
+
+- [ ] PAIR-121 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-122 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-123 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-124 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-125 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-126 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-127 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-128 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-129 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-130 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-131 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-132 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-133 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-134 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-135 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-136 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-137 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-138 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-139 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-140 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Conversation Or Ticket → message, comment, attachment, or notification
+
+- [ ] PAIR-141 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-142 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-143 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-144 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-145 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-146 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-147 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-148 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-149 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-150 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-151 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-152 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-153 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-154 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-155 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-156 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-157 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-158 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-159 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-160 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Webhook Or Integration → event, delivery, log, callback, or synchronized object
+
+- [ ] PAIR-161 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-162 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-163 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-164 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-165 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-166 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-167 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-168 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-169 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-170 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-171 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-172 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-173 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-174 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-175 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-176 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-177 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-178 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-179 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-180 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+## Parent Resource → background job, confirmation artifact, queue item, or generated output
+
+- [ ] PAIR-181 — Attempt to **read** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-182 — Attempt to **create** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-183 — Attempt to **update** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-184 — Attempt to **delete** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-185 — Attempt to **invoke state-changing action** with **authorized parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-186 — Attempt to **read** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-187 — Attempt to **create** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-188 — Attempt to **update** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-189 — Attempt to **delete** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-190 — Attempt to **invoke state-changing action** with **authorized parent + unauthorized controlled child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-191 — Attempt to **read** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-192 — Attempt to **create** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-193 — Attempt to **update** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-194 — Attempt to **delete** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-195 — Attempt to **invoke state-changing action** with **unauthorized controlled parent + authorized child** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-196 — Attempt to **read** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-197 — Attempt to **create** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-198 — Attempt to **update** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-199 — Attempt to **delete** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+- [ ] PAIR-200 — Attempt to **invoke state-changing action** with **parent from Tenant A + child from Tenant B or a stale cached child reference** using only controlled resources; verify both parent and child authorization and compare UI/API enforcement.
+
+---
+
+# Priority first pass
+
+- [ ] PRIORITY-001 — Build owner, admin, editor, viewer, guest, tenant-member-without-resource, and outsider states.
+- [ ] PRIORITY-002 — Capture every authenticated read and write request.
+- [ ] PRIORITY-003 — Replay every owner read request as a lower-privileged user and outsider.
+- [ ] PRIORITY-004 — Replay every owner write request as a lower-privileged user.
+- [ ] PRIORITY-005 — Swap only controlled tenant and object identifiers.
+- [ ] PRIORITY-006 — Test stale sessions after role downgrade and removal.
+- [ ] PRIORITY-007 — Test stale API tokens and pagination cursors after revocation.
+- [ ] PRIORITY-008 — Test lists, search, autocomplete, counts, aggregates, logs, notifications, and exports.
+- [ ] PRIORITY-009 — Test parent-child object mixing.
+- [ ] PRIORITY-010 — Test client-hidden fields and server-managed fields for mass assignment.
+- [ ] PRIORITY-011 — Test preview, confirmation, simulator, retry, export, and async job endpoints.
+- [ ] PRIORITY-012 — Test file download, preview, thumbnail, signed URL, and transformed-file authorization.
+- [ ] PRIORITY-013 — Test password reset, invitations, MFA, OAuth state, and account linking.
+- [ ] PRIORITY-014 — Test URL-fetching and webhooks only with endpoints you control.
+- [ ] PRIORITY-015 — Test public/private, rename, transfer, archive, delete/recreate, and feature-disable transitions.
+- [ ] PRIORITY-016 — Test payment and entitlement logic only in permitted sandbox or controlled flows.
+- [ ] PRIORITY-017 — Test one small safe race scenario per state-changing feature.
+- [ ] PRIORITY-018 — Reproduce candidates from clean sessions and eliminate intended behavior.
+
+---
+
+# Daily session template
+
+```markdown
+## Session YYYY-MM-DD
+
+### Scope
+- [ ] Policy rechecked
+- [ ] Only authorized assets selected
+- [ ] Active scanning disabled unless explicitly permitted
+- [ ] Controlled accounts and resources confirmed
+
+### Hypothesis
+- ID:
+- Attacker role:
+- Target object:
+- Expected behavior:
+- One variable changed:
+
+### Evidence
+- [ ] Authorized baseline saved
+- [ ] Unauthorized variant saved
+- [ ] Cross-tenant controlled variant saved
+- [ ] Post-revocation variant saved
+- [ ] Side effects checked
+- [ ] Cleanup completed
+
+### Result
+- Status:
+- Impact:
+- Evidence paths:
+- Next test:
+```
+
+---
+
+# References
+
+- OWASP Web Security Testing Guide.
+- OWASP API Security Top 10.
+- OWASP Application Security Verification Standard.
+- PortSwigger Web Security Academy.
+- Vendor documentation and the live program policy for the target.
+
+# Checklist count (Still Updating)
+
+- Core, methodology, feature, and priority checks: **872**
+- Authorization matrix checks: **756**
+- Parent-child matrix checks: **200**
+- **Total manual checklist items: 1828**
